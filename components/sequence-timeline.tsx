@@ -9,7 +9,6 @@ import { TRACKS } from "@/remotion/constants";
 export function SequenceTimeline() {
   const sequences = useTimelineStore((s) => s.sequences);
   const currentFrame = useTimelineStore((s) => s.currentFrame);
-  const selectedId = useTimelineStore((s) => s.selectedSequenceId);
   const setSelected = useTimelineStore((s) => s.setSelectedSequence);
   const setCurrentFrame = useTimelineStore((s) => s.setCurrentFrame);
   const playerRef = useTimelineStore((s) => s.playerRef);
@@ -46,14 +45,8 @@ export function SequenceTimeline() {
   return (
     <div className="h-full w-full p-2 space-y-2">
       {sortedSequences.map((seq) => {
-        const isActive = seq.fromMs <= currentMs && seq.toMs >= currentMs;
-        const isSelected = selectedId === seq.id;
+        const isActive = seq.fromMs <= currentMs && seq.toMs > currentMs;
         const fromFrame = (seq.fromMs / 1000) * fps;
-
-        const shouldHighlight =
-          isSelected || isActive
-            ? true // clicked and active → highlight only this one
-            : !selectedId && isActive; // nothing selected → fallback to all actives
 
         return (
           <div
@@ -64,11 +57,7 @@ export function SequenceTimeline() {
               jumpToFrame(fromFrame);
             }}
             className={`flex gap-4 cursor-pointer p-2 border rounded-md shadow transition
-               ${
-                 shouldHighlight && isActive
-                   ? "bg-yellow-100 border-yellow-400"
-                   : ""
-               }`}
+               ${isActive ? "bg-yellow-100 border-yellow-400" : ""}`}
           >
             {seq.type === "image" && (
               <div>

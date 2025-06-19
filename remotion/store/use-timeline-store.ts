@@ -27,19 +27,7 @@ export interface TextSequence extends BaseSequence {
   type: "text";
   text: string;
 
-  // # position of the text
-  pos?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
-  };
-
-  // # color of the text
-  color?: string;
-
-  // # width
-  width?: number;
+  config: TextConfig;
 }
 
 interface AudioTransitionSequence extends BaseSequence {
@@ -83,6 +71,19 @@ interface TimelineConfig {
   fps: number;
 }
 
+interface TextConfig {
+  pos?: {
+    left?: number;
+    top?: number;
+    right?: number;
+    bottom?: number;
+  };
+  width?: number;
+  color?: string;
+  isBold?: boolean;
+  isItalic?: boolean;
+}
+
 interface TimelineStore {
   enableCaptions: boolean;
   setEnableCaptions: (checked: boolean) => void;
@@ -112,6 +113,7 @@ interface TimelineStore {
   setPlayerRef: (playerRef: RefObject<PlayerRef>) => void;
 
   setState: (state: Partial<TimelineStore>) => Promise<void>;
+  updateTextConfig: (id: string, config: Partial<TextConfig>) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
@@ -162,12 +164,14 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       durationMs: 8000,
       track: TRACKS.TEXT,
       text: "I love Rosé from BP!",
-      pos: {
-        top: 100,
-        left: 0,
+      config: {
+        pos: {
+          top: 100,
+          left: 0,
+        },
+        width: 200,
+        color: "#f07167",
       },
-      width: 200,
-      color: "#f07167",
     },
     image__1: {
       fromMs: 2000,
@@ -241,6 +245,28 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
         ...existing,
         ...updates,
       } as SequenceObject;
+      return {
+        sequences: {
+          ...state.sequences,
+          [id]: updatedSequence,
+        },
+      };
+    }),
+
+  updateTextConfig: (id, config) =>
+    set((state) => {
+      const seq = state.sequences[id];
+
+      if (!seq || seq.type !== "text") return {};
+
+      const updatedSequence: TextSequence = {
+        ...seq,
+        config: {
+          ...(seq.config ?? {}),
+          ...(config ?? {}),
+        },
+      };
+
       return {
         sequences: {
           ...state.sequences,

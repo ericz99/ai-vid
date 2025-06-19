@@ -19,11 +19,12 @@ import { Main } from "@/remotion/main";
 import { AbsoluteFill } from "remotion";
 import LoadingSpinner from "@/components/spinner";
 import { parseMedia } from "@remotion/media-parser";
-import { useTimelineStore } from "@/remotion/store";
+import { TextSequence, useTimelineStore } from "@/remotion/store";
 import { SequenceTimeline } from "@/components/sequence-timeline";
-import { SequenceTools } from "@/components/sequence-tools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Subtitles } from "@/components/subtitles";
+import { TRACKS } from "@/remotion/constants";
+import { TextTools } from "@/components/tools/text-tools";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -56,8 +57,14 @@ export function PageClient({
   videoSrc: string;
   subtitles: { transcript: string; srt: string } | null;
 }) {
-  const { config, setConfig, setPlayerRef, setCurrentFrame } =
-    useTimelineStore();
+  const {
+    config,
+    setConfig,
+    setPlayerRef,
+    setCurrentFrame,
+    selectedSequenceId,
+    sequences,
+  } = useTimelineStore();
   const playerRef = useRef<PlayerRef>(null);
   const [isPreloaded, setPreload] = useState(false);
 
@@ -126,6 +133,12 @@ export function PageClient({
     };
   }, [subtitles, videoSrc]);
 
+  const seq = useMemo(() => {
+    if (selectedSequenceId) {
+      return sequences[selectedSequenceId];
+    }
+  }, [sequences, selectedSequenceId]);
+
   return (
     <div className="flex gap-4 h-screen overflow-hidden p-4">
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
@@ -148,7 +161,9 @@ export function PageClient({
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-        <SequenceTools />
+        {seq && seq?.track === TRACKS.TEXT && (
+          <TextTools sequence={seq as TextSequence} />
+        )}
       </div>
 
       <div className="flex-1 flex items-center justify-center p-2">

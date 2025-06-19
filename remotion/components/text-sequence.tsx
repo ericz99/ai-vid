@@ -38,7 +38,7 @@ const DESIRED_FONT_SIZE = 120;
 
 export const TextSequence = memo(
   ({ sequence }: { sequence: SequenceObject & ITextSequence }) => {
-    const { fromMs, durationMs, text, pos, width: textWidth, color } = sequence;
+    const { fromMs, durationMs, text, config } = sequence;
     const frame = useCurrentFrame();
     const { fps, width } = useVideoConfig();
 
@@ -67,18 +67,18 @@ export const TextSequence = memo(
         <AbsoluteFill
           style={{
             ...container,
-            ...pos,
+            ...config.pos,
           }}
         >
           <div
             style={{
-              width: textWidth,
+              width: config.width,
               fontSize,
               transform: makeTransform([
                 scale(interpolate(enter, [0, 1], [0.8, 1])),
                 translateY(interpolate(enter, [0, 1], [50, 0])),
               ]),
-              color: color ?? "#ffffff",
+              color: config.color ?? "#ffffff",
               WebkitTextStroke: "5px black",
               paintOrder: "stroke",
               fontWeight: "bold",
