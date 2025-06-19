@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useTimelineStore } from "@/remotion/store";
 import { msToSeconds } from "@/lib/utils";
 import Image from "next/image";
+import { TRACKS } from "@/remotion/constants";
 
 export function SequenceTimeline() {
   const sequences = useTimelineStore((s) => s.sequences);
@@ -13,6 +14,7 @@ export function SequenceTimeline() {
   const setCurrentFrame = useTimelineStore((s) => s.setCurrentFrame);
   const playerRef = useTimelineStore((s) => s.playerRef);
   const fps = useTimelineStore((s) => s.config?.fps ?? 30);
+  const enableCaptions = useTimelineStore((s) => s.enableCaptions);
   const [currentMs, setCurrentMs] = useState(0);
 
   useEffect(() => {
@@ -22,8 +24,14 @@ export function SequenceTimeline() {
   }, [currentFrame, fps]);
 
   const sortedSequences = useMemo(() => {
-    return Object.values(sequences).sort((a, b) => a.fromMs - b.fromMs);
-  }, [sequences]);
+    const seq = Object.values(sequences).sort((a, b) => a.fromMs - b.fromMs);
+
+    if (!enableCaptions) {
+      return seq.filter((s) => s.track !== TRACKS.SUBTITLES);
+    }
+
+    return seq;
+  }, [sequences, enableCaptions]);
 
   const jumpToFrame = useCallback(
     (frame: number) => {

@@ -56,6 +56,7 @@ export const Main = ({
     setCaptions,
     loadCaption,
     setLoadCaption,
+    enableCaptions,
   } = useTimelineStore();
 
   const { fps } = useVideoConfig();
@@ -134,9 +135,10 @@ export const Main = ({
       </AbsoluteFill>
 
       {/* SUBTITLE SEQUENCE - TRACK 1 -> SUBTITLES */}
-      {subTitlesSequences.map((seq) => (
-        <SubtitleSequence key={seq.id} sequence={seq} />
-      ))}
+      {enableCaptions &&
+        subTitlesSequences.map((seq) => (
+          <SubtitleSequence key={seq.id} sequence={seq} />
+        ))}
 
       {/* TEXT SEQUENCE */}
       {titleSequences.map((seq) => (

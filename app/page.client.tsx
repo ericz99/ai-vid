@@ -22,6 +22,8 @@ import { parseMedia } from "@remotion/media-parser";
 import { useTimelineStore } from "@/remotion/store";
 import { SequenceTimeline } from "@/components/sequence-timeline";
 import { SequenceTools } from "@/components/sequence-tools";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Subtitles } from "@/components/subtitles";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -127,7 +129,22 @@ export function PageClient({
   return (
     <div className="flex gap-4 h-screen overflow-hidden p-4">
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-        <SequenceTimeline />
+        <Tabs defaultValue="sequence">
+          <TabsList className="w-full">
+            <TabsTrigger value="sequence">Sequence</TabsTrigger>
+            <TabsTrigger value="subtitles">Subtitles</TabsTrigger>
+            <TabsTrigger value="audio">Audio</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sequence">
+            <SequenceTimeline />
+          </TabsContent>
+
+          <TabsContent value="subtitles">
+            <Subtitles />
+          </TabsContent>
+          <TabsContent value="audio">audio</TabsContent>
+        </Tabs>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">

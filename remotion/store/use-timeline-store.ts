@@ -84,6 +84,9 @@ interface TimelineConfig {
 }
 
 interface TimelineStore {
+  enableCaptions: boolean;
+  setEnableCaptions: (checked: boolean) => void;
+
   loadCaption: boolean;
   setLoadCaption: () => void;
 
@@ -112,6 +115,12 @@ interface TimelineStore {
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
+  enableCaptions: true,
+  setEnableCaptions: (checked: boolean) =>
+    set(() => ({
+      enableCaptions: checked,
+    })),
+
   loadCaption: false,
   setLoadCaption: () =>
     set(() => ({
