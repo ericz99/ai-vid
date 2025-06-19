@@ -6,22 +6,62 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "install-whisper": "node ./remotion/install-whisper-cpp.mjs"
   },
   "dependencies": {
+    "@ai-sdk/deepgram": "^0.0.1",
+    "@ai-sdk/google": "^1.2.19",
+    "@deepgram/sdk": "^4.3.0",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.7",
+    "@remotion/animation-utils": "^4.0.314",
+    "@remotion/captions": "^4.0.314",
+    "@remotion/cli": "^4.0.314",
+    "@remotion/google-fonts": "^4.0.314",
+    "@remotion/install-whisper-cpp": "^4.0.314",
+    "@remotion/layout-utils": "^4.0.314",
+    "@remotion/media-parser": "^4.0.314",
+    "@remotion/paths": "^4.0.314",
+    "@remotion/player": "^4.0.314",
+    "@remotion/preload": "^4.0.314",
+    "@remotion/tailwind-v4": "^4.0.314",
+    "@remotion/transitions": "^4.0.314",
+    "@remotion/webcodecs": "^4.0.314",
+    "ai": "^4.3.16",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.513.0",
+    "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.3"
+    "react-player": "^2.16.0",
+    "remotion": "^4.0.314",
+    "tailwind-merge": "^3.3.0",
+    "uploadthing": "^7.7.2",
+    "zod": "^3.25.61",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "@eslint/eslintrc": "^3"
+    "prisma": "^6.9.0",
+    "tailwindcss": "^4",
+    "tw-animate-css": "^1.3.4",
+    "typescript": "^5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
   }
 }
