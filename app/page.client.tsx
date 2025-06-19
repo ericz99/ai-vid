@@ -62,7 +62,6 @@ export function PageClient({
   useEffect(() => {
     if (config || subtitles) {
       if (playerRef && playerRef.current != null) {
-        console.log("playerref", playerRef);
         setPlayerRef(playerRef as React.RefObject<PlayerRef>);
       }
     }
@@ -98,7 +97,6 @@ export function PageClient({
     if (config || subtitles) {
       if (playerRef.current) {
         playerRef.current.addEventListener("frameupdate", (e) => {
-          console.log("frame", e.detail.frame);
           setCurrentFrame(e.detail.frame);
         });
       }

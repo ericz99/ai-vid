@@ -1,7 +1,10 @@
 "use client";
 
 import { memo } from "react";
-import type { TextSequence as ITextSequence } from "@/remotion/store";
+import type {
+  TextSequence as ITextSequence,
+  SequenceObject,
+} from "@/remotion/store";
 import {
   Sequence,
   spring,
@@ -34,7 +37,7 @@ const container: React.CSSProperties = {
 const DESIRED_FONT_SIZE = 120;
 
 export const TextSequence = memo(
-  ({ sequence }: { sequence: ITextSequence }) => {
+  ({ sequence }: { sequence: SequenceObject & ITextSequence }) => {
     const { fromMs, durationMs, text, pos, width: textWidth, color } = sequence;
     const frame = useCurrentFrame();
     const { fps, width } = useVideoConfig();

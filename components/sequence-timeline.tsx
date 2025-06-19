@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useTimelineStore } from "@/remotion/store";
 import { msToSeconds } from "@/lib/utils";
+import Image from "next/image";
 
 export function SequenceTimeline() {
   const sequences = useTimelineStore((s) => s.sequences);
@@ -16,7 +17,6 @@ export function SequenceTimeline() {
 
   useEffect(() => {
     if (currentFrame) {
-      console.log("currentFrame", currentFrame);
       setCurrentMs((currentFrame / fps) * 1000);
     }
   }, [currentFrame, fps]);
@@ -28,7 +28,6 @@ export function SequenceTimeline() {
   const jumpToFrame = useCallback(
     (frame: number) => {
       if (playerRef?.current) {
-        console.log("player", playerRef);
         playerRef.current.seekTo(frame);
         setCurrentFrame(frame);
       }
@@ -56,24 +55,39 @@ export function SequenceTimeline() {
               setSelected(seq.id);
               jumpToFrame(fromFrame);
             }}
-            className={`cursor-pointer p-2 border rounded shadow transition
+            className={`flex gap-4 cursor-pointer p-2 border rounded-md shadow transition
                ${
                  shouldHighlight && isActive
                    ? "bg-yellow-100 border-yellow-400"
                    : ""
                }`}
           >
-            <div>
-              <strong>{seq.type.toUpperCase()}</strong> — {seq.id}
-            </div>
-            <div>
-              From: {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s
-            </div>
-            {seq.type === "text" && (
+            {seq.type === "image" && (
               <div>
-                Text: <em>{seq.text}</em>
+                <Image
+                  src={seq.src}
+                  alt={`alt__img__${seq.id}`}
+                  width={50}
+                  height={50}
+                  unoptimized
+                  className="rounded-md"
+                />
               </div>
             )}
+
+            <div className="flex-1 flex flex-col gap-2">
+              <div>
+                <strong>{seq.type.toUpperCase()}</strong> — {seq.id}
+              </div>
+              <div>
+                From: {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s
+              </div>
+              {seq.type === "text" && (
+                <div>
+                  Text: <em>{seq.text}</em>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

@@ -2,8 +2,14 @@ import { PlayerRef } from "@remotion/player";
 import { create } from "zustand";
 import { RefObject } from "react";
 import { Caption } from "@remotion/captions";
+import { TRACKS } from "../constants";
 
-type SequenceType = "text" | "video" | "audio-transition" | "image";
+type SequenceType =
+  | "text"
+  | "subtitles"
+  | "video"
+  | "audio-transition"
+  | "image";
 
 interface BaseSequence {
   id: string;
@@ -78,6 +84,9 @@ interface TimelineConfig {
 }
 
 interface TimelineStore {
+  loadCaption: boolean;
+  setLoadCaption: () => void;
+
   selectedSequenceId: string | null;
   setSelectedSequence: (id: string | null) => void;
 
@@ -103,6 +112,12 @@ interface TimelineStore {
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
+  loadCaption: false,
+  setLoadCaption: () =>
+    set(() => ({
+      loadCaption: true,
+    })),
+
   selectedSequenceId: null,
   setSelectedSequence: (id) =>
     set(() => ({
@@ -128,7 +143,48 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       config,
     })),
 
-  sequences: {},
+  sequences: {
+    // # DEFAULT WILL DELETE
+    text__0: {
+      type: "text",
+      id: `text__0`,
+      fromMs: 2000,
+      toMs: 10000,
+      durationMs: 8000,
+      track: TRACKS.TEXT,
+      text: "I love Rosé from BP!",
+      pos: {
+        top: 100,
+        left: 0,
+      },
+      width: 200,
+      color: "#f07167",
+    },
+    image__1: {
+      fromMs: 2000,
+      toMs: 4000,
+      durationMs: 2000,
+      src: "https://1beinzj2lh.ufs.sh/f/aRikP5xoOpFDr2gamwsULMt1R84T2JfsEGqg3dy0vxonNl67",
+      styleType: "full",
+      type: "image",
+      id: "image__1",
+      track: TRACKS.IMAGE,
+      transitionIn: "fade",
+      transitionOut: "fade",
+    },
+    image__2: {
+      fromMs: 4000,
+      toMs: 6000,
+      durationMs: 2000,
+      src: "https://1beinzj2lh.ufs.sh/f/aRikP5xoOpFD9byk6Yr8zhQiCDwR2VFA4GUeg1mk3nNLsBq0",
+      styleType: "full",
+      type: "image",
+      id: "image__2",
+      track: TRACKS.IMAGE,
+      transitionIn: "slide",
+      transitionOut: "slide",
+    },
+  },
 
   playerRef: null,
 

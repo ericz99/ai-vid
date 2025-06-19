@@ -10,7 +10,12 @@ import {
 import { LoopableOffthreadVideo } from "./loop-thread-video";
 import { useEffect, useMemo } from "react";
 import { SWITCH_CAPTIONS_EVERY_MS } from "@/lib/preset";
-import { SequenceObject, useTimelineStore } from "./store";
+import {
+  SequenceObject,
+  TextSequence as ITextSequence,
+  useTimelineStore,
+  ImageSequence as IImageSequence,
+} from "./store";
 import { TRACKS } from "./constants";
 import { ImageSequence } from "./components/image-sequence";
 import { SubtitleSequence } from "./components/subtitle-sequence";
@@ -44,8 +49,14 @@ export const Main = ({
   subtitles: { transcript: string; srt: string } | null;
   videoSrc: string;
 }) => {
-  const { sequences, bulkAddSequence, captions, setCaptions } =
-    useTimelineStore();
+  const {
+    sequences,
+    bulkAddSequence,
+    captions,
+    setCaptions,
+    loadCaption,
+    setLoadCaption,
+  } = useTimelineStore();
 
   const { fps } = useVideoConfig();
 
@@ -66,8 +77,7 @@ export const Main = ({
 
   // # load default sequence for the captions
   useEffect(() => {
-    const hasSequence = Object.keys(sequences);
-    if (hasSequence.length === 0) {
+    if (!loadCaption && pages.length > 0) {
       console.log("LOADING SEQUENCES");
       const allCaptionSequence = pages
         .map((page, index) => {
@@ -76,7 +86,7 @@ export const Main = ({
 
           return {
             type: "text",
-            id: `text__${index}`,
+            id: `subtitle__${index}`,
             fromMs: page.startMs,
             toMs: originalToMs,
             durationMs,
@@ -88,12 +98,29 @@ export const Main = ({
 
       // # bulk add caption sequences
       bulkAddSequence(allCaptionSequence);
-    }
-  }, [bulkAddSequence, fps, pages, sequences]);
 
-  const subTitlesSequences = Object.values(sequences)
-    .filter((seq) => seq.type === "text")
-    .sort((a, b) => a.fromMs - b.fromMs);
+      // # update load caption
+      setLoadCaption();
+    }
+  }, [bulkAddSequence, fps, pages, loadCaption, setLoadCaption]);
+
+  const subTitlesSequences = useMemo(() => {
+    return Object.values(sequences)
+      .filter((seq) => seq.track === TRACKS.SUBTITLES)
+      .sort((a, b) => a.fromMs - b.fromMs) as ITextSequence[];
+  }, [sequences]);
+
+  const titleSequences = useMemo(() => {
+    return Object.values(sequences)
+      .filter((seq) => seq.track === TRACKS.TEXT)
+      .sort((a, b) => a.fromMs - b.fromMs) as ITextSequence[];
+  }, [sequences]);
+
+  const imageSequence = useMemo(() => {
+    return Object.values(sequences)
+      .filter((seq) => seq.track === TRACKS.IMAGE)
+      .sort((a, b) => a.fromMs - b.fromMs) as IImageSequence[];
+  }, [sequences]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "white" }}>
@@ -111,51 +138,15 @@ export const Main = ({
         <SubtitleSequence key={seq.id} sequence={seq} />
       ))}
 
-      <TextSequence
-        sequence={{
-          type: "text",
-          id: `text__0`,
-          fromMs: 2000,
-          toMs: 10000,
-          durationMs: 8000,
-          track: TRACKS.TEXT,
-          text: "I love Rosé from BP!",
-          pos: {
-            top: 100,
-            left: 0,
-          },
-          width: 200,
-          color: "#f07167",
-        }}
-      />
+      {/* TEXT SEQUENCE */}
+      {titleSequences.map((seq) => (
+        <TextSequence key={seq.id} sequence={seq} />
+      ))}
 
-      <ImageSequence
-        sequence={{
-          fromMs: 2000,
-          toMs: 4000,
-          durationMs: 2000,
-          src: "https://1beinzj2lh.ufs.sh/f/aRikP5xoOpFDr2gamwsULMt1R84T2JfsEGqg3dy0vxonNl67",
-          styleType: "full",
-          type: "image",
-          id: "image__1",
-          transitionIn: "fade",
-          transitionOut: "fade",
-        }}
-      />
-
-      <ImageSequence
-        sequence={{
-          fromMs: 4000,
-          toMs: 6000,
-          durationMs: 2000,
-          src: "https://1beinzj2lh.ufs.sh/f/aRikP5xoOpFD9byk6Yr8zhQiCDwR2VFA4GUeg1mk3nNLsBq0",
-          styleType: "full",
-          type: "image",
-          id: "image__2",
-          transitionIn: "slide",
-          transitionOut: "slide",
-        }}
-      />
+      {/* IMAGE SEQUENCE */}
+      {imageSequence.map((seq) => (
+        <ImageSequence key={seq.id} sequence={seq} />
+      ))}
     </AbsoluteFill>
   );
 };
