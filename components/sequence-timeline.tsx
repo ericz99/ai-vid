@@ -44,7 +44,7 @@ export function SequenceTimeline() {
         const fromFrame = (seq.fromMs / 1000) * fps;
 
         const shouldHighlight =
-          isSelected && isActive
+          isSelected || isActive
             ? true // clicked and active → highlight only this one
             : !selectedId && isActive; // nothing selected → fallback to all actives
 
@@ -58,7 +58,7 @@ export function SequenceTimeline() {
             }}
             className={`cursor-pointer p-2 border rounded shadow transition
                ${
-                 shouldHighlight || isActive
+                 shouldHighlight && isActive
                    ? "bg-yellow-100 border-yellow-400"
                    : ""
                }`}
