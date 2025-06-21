@@ -5,17 +5,10 @@ import type {
   TextSequence as ITextSequence,
   SequenceObject,
 } from "@/remotion/store";
-import {
-  Sequence,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-  AbsoluteFill,
-  interpolate,
-} from "remotion";
-import { makeTransform, scale, translateY } from "@remotion/animation-utils";
+import { Sequence, useVideoConfig, AbsoluteFill } from "remotion";
 import * as Montserrat from "@remotion/google-fonts/Montserrat";
 import { fitText } from "@remotion/layout-utils";
+import { ScaleUpCenter } from "../presets/animations/scale-up-center";
 
 const { fontFamily } = Montserrat.loadFont("normal", {
   weights: ["400", "600", "800"],
@@ -39,7 +32,6 @@ const DESIRED_FONT_SIZE = 120;
 export const TextSequence = memo(
   ({ sequence }: { sequence: SequenceObject & ITextSequence }) => {
     const { fromMs, durationMs, text, config } = sequence;
-    const frame = useCurrentFrame();
     const { fps, width } = useVideoConfig();
 
     // Convert fromMs and durationMs (ms) to frames for Sequence props
@@ -53,43 +45,37 @@ export const TextSequence = memo(
       textTransform: "uppercase",
     });
 
-    const fontSize = Math.min(DESIRED_FONT_SIZE, fittedText.fontSize);
-
-    const enter = spring({
-      frame,
-      fps,
-      config: { damping: 200 },
-      durationInFrames: durationInFrames,
-    });
+    const fontSize = Math.min(
+      config.fontSize ?? DESIRED_FONT_SIZE,
+      fittedText.fontSize
+    );
 
     return (
       <Sequence from={fromFrame} durationInFrames={durationInFrames}>
-        <AbsoluteFill
-          style={{
-            ...container,
-            ...config.pos,
-          }}
-        >
-          <div
+        <ScaleUpCenter>
+          <AbsoluteFill
             style={{
-              width: config.width,
-              fontSize,
-              transform: makeTransform([
-                scale(interpolate(enter, [0, 1], [0.8, 1])),
-                translateY(interpolate(enter, [0, 1], [50, 0])),
-              ]),
-              color: config.color ?? "#ffffff",
-              WebkitTextStroke: "5px black",
-              paintOrder: "stroke",
-              fontWeight: "bold",
-              textAlign: "center",
-              fontFamily,
-              textTransform: "uppercase",
+              ...container,
+              ...config.pos,
             }}
           >
-            {text}
-          </div>
-        </AbsoluteFill>
+            <div
+              style={{
+                width: config.width,
+                fontSize,
+                color: config.color ?? "#ffffff",
+                WebkitTextStroke: "5px black",
+                paintOrder: "stroke",
+                fontWeight: "bold",
+                textAlign: "center",
+                fontFamily,
+                textTransform: "uppercase",
+              }}
+            >
+              {text}
+            </div>
+          </AbsoluteFill>
+        </ScaleUpCenter>
       </Sequence>
     );
   }

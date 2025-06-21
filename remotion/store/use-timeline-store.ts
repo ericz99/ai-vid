@@ -82,6 +82,7 @@ interface TextConfig {
   color?: string;
   isBold?: boolean;
   isItalic?: boolean;
+  fontSize?: number;
 }
 
 interface TimelineStore {
@@ -114,9 +115,14 @@ interface TimelineStore {
 
   setState: (state: Partial<TimelineStore>) => Promise<void>;
   updateTextConfig: (id: string, config: Partial<TextConfig>) => void;
+
+  preset: string | null;
+  setPreset: (preset: string) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
+  preset: null,
+
   enableCaptions: true,
   setEnableCaptions: (checked: boolean) =>
     set(() => ({
@@ -171,6 +177,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
         },
         width: 200,
         color: "#f07167",
+        fontSize: 24,
       },
     },
     image__1: {
@@ -274,6 +281,11 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
         },
       };
     }),
+
+  setPreset: (preset: string | null) =>
+    set(() => ({
+      preset,
+    })),
 
   setState: async (partialState) => {
     set((prev) => ({ ...prev, ...partialState }));

@@ -13,9 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CaptionPreview } from "./text-presets-preview";
 
 export function TextTools({ sequence }: { sequence: ITextSequence }) {
   const updateTextConfig = useTimelineStore((s) => s.updateTextConfig);
+  const selectedPreset = useTimelineStore((s) => s.preset);
+  const setPreset = useTimelineStore((s) => s.setPreset);
 
   return (
     <div className="h-full w-full p-2 flex flex-col gap-6">
@@ -50,38 +53,58 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
         </Button>
       </div>
 
-      {/* Color Picker */}
-      <div className="space-y-2">
-        <Label htmlFor="color-input">Text Color</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            id="color-input"
-            type="text"
-            value={sequence.config.color}
-            onChange={(e) =>
-              updateTextConfig(sequence.id, {
-                color: e.target.value,
-              })
-            }
-            className="font-mono"
-            placeholder="#FFFFFF"
-          />
-          <div
-            className="w-9 h-9 rounded-lg border-2 border-gray-300 cursor-pointer"
-            style={{ backgroundColor: sequence.config.color }}
-            onClick={() => document.getElementById("color-picker")?.click()}
-          />
-          <input
-            id="color-picker"
-            type="color"
-            value={sequence.config.color}
-            onChange={(e) =>
-              updateTextConfig(sequence.id, {
-                color: e.target.value,
-              })
-            }
-            className="sr-only"
-          />
+      <div className="space-y-2 flex gap-2 justify-between">
+        <div className="flex-1 flex flex-col gap-2">
+          <Label htmlFor="font-size">Font Size</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="font-size"
+              type="number"
+              value={sequence.config.fontSize}
+              onChange={(e) =>
+                updateTextConfig(sequence.id, {
+                  fontSize: Number(e.target.value),
+                })
+              }
+              className="font-size"
+              placeholder="10"
+            />
+          </div>
+        </div>
+
+        {/* Color Picker */}
+        <div className="space-y-2 flex-1">
+          <Label htmlFor="color-input">Text Color</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="color-input"
+              type="text"
+              value={sequence.config.color}
+              onChange={(e) =>
+                updateTextConfig(sequence.id, {
+                  color: e.target.value,
+                })
+              }
+              className="font-mono"
+              placeholder="#FFFFFF"
+            />
+            <div
+              className="w-9 h-9 rounded-lg border-2 border-gray-300 cursor-pointer"
+              style={{ backgroundColor: sequence.config.color }}
+              onClick={() => document.getElementById("color-picker")?.click()}
+            />
+            <input
+              id="color-picker"
+              type="color"
+              value={sequence.config.color}
+              onChange={(e) =>
+                updateTextConfig(sequence.id, {
+                  color: e.target.value,
+                })
+              }
+              className="sr-only"
+            />
+          </div>
         </div>
       </div>
 
@@ -89,7 +112,7 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
 
       {/* Layout Section */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Layout</h3>
+        <h3 className="text-lg font-medium mb-3">Layout</h3>
         <div className="grid grid-cols-2 gap-4">
           {/* Top */}
           <div className="space-y-2">
@@ -187,6 +210,19 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             />
           </div>
         </div>
+      </div>
+
+      {/* PRESET TEXT */}
+
+      <Separator className="my-4" />
+
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-medium mb-3">Text Preset</h3>
+
+        <CaptionPreview
+          onSelect={(preset: string) => setPreset(preset)}
+          selectedPreset={selectedPreset}
+        />
       </div>
     </div>
   );
