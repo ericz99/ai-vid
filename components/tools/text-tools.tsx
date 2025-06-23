@@ -9,6 +9,13 @@ import {
 
 import { Bold, Italic } from "lucide-react";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -217,12 +224,32 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
       <Separator className="my-4" />
 
       <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-medium mb-3">Text Preset</h3>
+        <Accordion type="multiple" className="space-y-4">
+          <AccordionItem
+            value="text-preset"
+            className="border border-border/50 rounded-xl bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+          >
+            <AccordionTrigger className="px-6 py-5 hover:no-underline group [&[data-state=open]]:border-b [&[data-state=open]]:border-border/50">
+              Text Preset
+            </AccordionTrigger>
+            <AccordionContent>
+              <CaptionPreview
+                onSelect={(preset: string) => setPreset(preset)}
+                selectedPreset={selectedPreset}
+              />
+            </AccordionContent>
+          </AccordionItem>
 
-        <CaptionPreview
-          onSelect={(preset: string) => setPreset(preset)}
-          selectedPreset={selectedPreset}
-        />
+          <AccordionItem
+            value="text-animation"
+            className="border border-border/50 rounded-xl bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+          >
+            <AccordionTrigger className="px-6 py-5 hover:no-underline group [&[data-state=open]]:border-b [&[data-state=open]]:border-border/50">
+              Animation
+            </AccordionTrigger>
+            <AccordionContent>Animation...</AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );

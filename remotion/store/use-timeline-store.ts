@@ -169,7 +169,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       toMs: 10000,
       durationMs: 8000,
       track: TRACKS.TEXT,
-      text: "I love Rosé from BP!",
+      text: "I love Rosé from BP!!!!!!!!!!!!!!!!!!!!",
       config: {
         pos: {
           top: 100,

@@ -1,14 +1,16 @@
 "use client";
 
-import { memo } from "react";
-import type {
-  TextSequence as ITextSequence,
-  SequenceObject,
+import { memo, useMemo } from "react";
+import {
+  useTimelineStore,
+  type TextSequence as ITextSequence,
+  type SequenceObject,
 } from "@/remotion/store";
 import { Sequence, useVideoConfig, AbsoluteFill } from "remotion";
 import * as Montserrat from "@remotion/google-fonts/Montserrat";
 import { fitText } from "@remotion/layout-utils";
 import { ScaleUpCenter } from "../presets/animations/scale-up-center";
+import { captionPresets } from "../presets/text";
 
 const { fontFamily } = Montserrat.loadFont("normal", {
   weights: ["400", "600", "800"],
@@ -31,6 +33,7 @@ const DESIRED_FONT_SIZE = 120;
 
 export const TextSequence = memo(
   ({ sequence }: { sequence: SequenceObject & ITextSequence }) => {
+    const preset = useTimelineStore((s) => s.preset);
     const { fromMs, durationMs, text, config } = sequence;
     const { fps, width } = useVideoConfig();
 
@@ -44,6 +47,10 @@ export const TextSequence = memo(
       withinWidth: width * 0.9,
       textTransform: "uppercase",
     });
+
+    const presetStyles = useMemo(() => {
+      return captionPresets.find((c) => c.id === preset);
+    }, [preset]);
 
     const fontSize = Math.min(
       config.fontSize ?? DESIRED_FONT_SIZE,
@@ -64,12 +71,13 @@ export const TextSequence = memo(
                 width: config.width,
                 fontSize,
                 color: config.color ?? "#ffffff",
-                WebkitTextStroke: "5px black",
+                // WebkitTextStroke: "5px black",
                 paintOrder: "stroke",
                 fontWeight: "bold",
                 textAlign: "center",
                 fontFamily,
                 textTransform: "uppercase",
+                ...presetStyles?.textStyle,
               }}
             >
               {text}
