@@ -24,8 +24,7 @@ import { CaptionPreview } from "./text-presets-preview";
 
 export function TextTools({ sequence }: { sequence: ITextSequence }) {
   const updateTextConfig = useTimelineStore((s) => s.updateTextConfig);
-  const selectedPreset = useTimelineStore((s) => s.preset);
-  const setPreset = useTimelineStore((s) => s.setPreset);
+  const updateTextSequence = useTimelineStore((s) => s.updateTextSequence);
 
   return (
     <div className="h-full w-full p-2 flex flex-col gap-6">
@@ -234,8 +233,12 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             </AccordionTrigger>
             <AccordionContent>
               <CaptionPreview
-                onSelect={(preset: string) => setPreset(preset)}
-                selectedPreset={selectedPreset}
+                onSelect={(preset: string) =>
+                  updateTextSequence(sequence.id, {
+                    preset,
+                  })
+                }
+                selectedPreset={sequence.preset}
               />
             </AccordionContent>
           </AccordionItem>

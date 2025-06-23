@@ -28,6 +28,7 @@ export interface TextSequence extends BaseSequence {
   text: string;
 
   config: TextConfig;
+  preset?: string | null;
 }
 
 interface AudioTransitionSequence extends BaseSequence {
@@ -115,9 +116,7 @@ interface TimelineStore {
 
   setState: (state: Partial<TimelineStore>) => Promise<void>;
   updateTextConfig: (id: string, config: Partial<TextConfig>) => void;
-
-  preset: string | null;
-  setPreset: (preset: string) => void;
+  updateTextSequence: (id: string, state: Partial<TextSequence>) => void;
 
   // # for images
   updateImageConfig: (id: string, state: Partial<ImageSequence>) => void;
@@ -304,10 +303,24 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       };
     }),
 
-  setPreset: (preset: string | null) =>
-    set(() => ({
-      preset,
-    })),
+  updateTextSequence: (id, config) =>
+    set((state) => {
+      const seq = state.sequences[id];
+
+      if (!seq || seq.type !== "text") return {};
+
+      const updatedSequence: TextSequence = {
+        ...seq,
+        ...config,
+      };
+
+      return {
+        sequences: {
+          ...state.sequences,
+          [id]: updatedSequence,
+        },
+      };
+    }),
 
   setState: async (partialState) => {
     set((prev) => ({ ...prev, ...partialState }));

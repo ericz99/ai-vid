@@ -2,7 +2,6 @@
 
 import { memo, useMemo } from "react";
 import {
-  useTimelineStore,
   type TextSequence as ITextSequence,
   type SequenceObject,
 } from "@/remotion/store";
@@ -33,7 +32,6 @@ const DESIRED_FONT_SIZE = 120;
 
 export const TextSequence = memo(
   ({ sequence }: { sequence: SequenceObject & ITextSequence }) => {
-    const preset = useTimelineStore((s) => s.preset);
     const { fromMs, durationMs, text, config } = sequence;
     const { fps, width } = useVideoConfig();
 
@@ -49,8 +47,8 @@ export const TextSequence = memo(
     });
 
     const presetStyles = useMemo(() => {
-      return captionPresets.find((c) => c.id === preset);
-    }, [preset]);
+      return captionPresets.find((c) => c.id === sequence.preset);
+    }, [sequence]);
 
     const fontSize = Math.min(
       config.fontSize ?? DESIRED_FONT_SIZE,

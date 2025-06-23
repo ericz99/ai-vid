@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 interface CaptionPreviewProps {
   sampleText?: string;
   onSelect: (preset: string) => void;
-  selectedPreset: string | null;
+  selectedPreset?: string | null;
 }
 
 export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
