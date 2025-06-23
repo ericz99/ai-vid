@@ -67,6 +67,7 @@ const TextChunk = ({
   fromMs,
   currentTimeMs,
   fps,
+  sequence,
 }: {
   chunk: WordToken[];
   fromMs: number;
@@ -74,6 +75,7 @@ const TextChunk = ({
   fps: number;
   sequence: ITextSequence;
 }) => {
+  const { config } = sequence;
   const frame = useCurrentFrame(); // Scoped to chunk's sequence
 
   const chunkStartMs = chunk[0].fromMs;
@@ -93,7 +95,6 @@ const TextChunk = ({
   return (
     <div
       style={{
-        color: "white",
         WebkitTextStroke: "5px black",
         paintOrder: "stroke",
         fontWeight: "bold",
@@ -107,6 +108,9 @@ const TextChunk = ({
         justifyContent: "center",
         alignItems: "center",
         transform: makeTransform([scale(interpolate(enter, [0, 1], [0.8, 1]))]),
+
+        color: config.color ?? "#ffffff",
+        fontSize: config.color ?? 24,
       }}
     >
       {chunk.map(({ word, fromMs: fromMsWord, toMs: toMsWord }, wordIndex) => {
@@ -135,7 +139,7 @@ const TextChunk = ({
 
 export const SubtitleSequence = memo(
   ({ sequence }: { sequence: ITextSequence }) => {
-    const { fromMs, durationMs, text } = sequence;
+    const { fromMs, durationMs, text, config } = sequence;
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
     const currentTimeMs = (frame / fps) * 1000;
@@ -152,9 +156,16 @@ export const SubtitleSequence = memo(
     const fromFrame = (fromMs / 1000) * fps;
     const durationInFrames = (durationMs / 1000) * fps;
 
+    console.log("config", config);
+
     return (
       <Sequence from={fromFrame} durationInFrames={durationInFrames}>
-        <AbsoluteFill style={container}>
+        <AbsoluteFill
+          style={{
+            ...container,
+            ...config.pos,
+          }}
+        >
           {wordChunks.map((chunk, index) => {
             const startFrameForChunk = Math.floor(
               (chunk[0].fromMs / 1000) * fps

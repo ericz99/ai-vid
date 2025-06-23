@@ -93,6 +93,7 @@ export const Main = ({
             durationMs,
             track: TRACKS.SUBTITLES,
             text: page.text,
+            config: {},
           };
         })
         .filter((c) => c) as SequenceObject[];

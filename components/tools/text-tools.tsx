@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CaptionPreview } from "./text-presets-preview";
+import { TRACKS } from "@/remotion/constants";
 
 export function TextTools({ sequence }: { sequence: ITextSequence }) {
   const updateTextConfig = useTimelineStore((s) => s.updateTextConfig);
@@ -66,7 +67,7 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             <Input
               id="font-size"
               type="number"
-              value={sequence.config.fontSize}
+              value={sequence.config.fontSize ?? 0}
               onChange={(e) =>
                 updateTextConfig(sequence.id, {
                   fontSize: Number(e.target.value),
@@ -85,7 +86,7 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             <Input
               id="color-input"
               type="text"
-              value={sequence.config.color}
+              value={sequence.config.color ?? "#ffffff"}
               onChange={(e) =>
                 updateTextConfig(sequence.id, {
                   color: e.target.value,
@@ -102,7 +103,7 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             <input
               id="color-picker"
               type="color"
-              value={sequence.config.color}
+              value={sequence.config.color ?? "#ffffff"}
               onChange={(e) =>
                 updateTextConfig(sequence.id, {
                   color: e.target.value,
@@ -112,6 +113,42 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             />
           </div>
         </div>
+
+        {sequence.track === TRACKS.SUBTITLES && (
+          <div className="space-y-2 flex-1">
+            <Label htmlFor="color-input">Bounce Text Color</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="bounce-color-picker"
+                type="text"
+                value={sequence.config.color ?? "#ffffff"}
+                onChange={(e) =>
+                  updateTextConfig(sequence.id, {
+                    color: e.target.value,
+                  })
+                }
+                className="font-mono"
+                placeholder="#FFFFFF"
+              />
+              <div
+                className="w-9 h-9 rounded-lg border-2 border-gray-300 cursor-pointer"
+                style={{ backgroundColor: sequence.config.color }}
+                onClick={() => document.getElementById("color-picker")?.click()}
+              />
+              <input
+                id="bounce-color-picker"
+                type="color"
+                value={sequence.config.color ?? "#ffffff"}
+                onChange={(e) =>
+                  updateTextConfig(sequence.id, {
+                    color: e.target.value,
+                  })
+                }
+                className="sr-only"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <Separator className="my-4" />
@@ -123,14 +160,15 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
           {/* Top */}
           <div className="space-y-2">
             <Label htmlFor="layout-top" className="text-xs text-gray-600">
-              Top
+              Top / Bottom
             </Label>
             <Input
               id="layout-top"
-              type="number"
+              type="range"
               min="-1000"
               max="1000"
-              value={sequence.config.pos?.top}
+              step="1"
+              value={sequence.config.pos?.top ?? 0}
               onChange={(e) =>
                 updateTextConfig(sequence.id, {
                   pos: {
@@ -144,70 +182,22 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             />
           </div>
 
-          {/* Right */}
-          <div className="space-y-2">
-            <Label htmlFor="layout-right" className="text-xs text-gray-600">
-              Right
-            </Label>
-            <Input
-              id="layout-right"
-              type="number"
-              min="-1000"
-              max="1000"
-              value={sequence.config.pos?.right}
-              onChange={(e) =>
-                updateTextConfig(sequence.id, {
-                  pos: {
-                    ...sequence.config.pos,
-                    right: Number(e.target.value),
-                  },
-                })
-              }
-              className="text-sm"
-              placeholder="0"
-            />
-          </div>
-
           {/* Left */}
           <div className="space-y-2">
             <Label htmlFor="layout-left" className="text-xs text-gray-600">
-              Left
+              Left / Right
             </Label>
             <Input
               id="layout-left"
-              type="number"
+              type="range"
               min="-1000"
               max="1000"
-              value={sequence.config.pos?.left}
+              value={sequence.config.pos?.left ?? 0}
               onChange={(e) =>
                 updateTextConfig(sequence.id, {
                   pos: {
                     ...sequence.config.pos,
                     left: Number(e.target.value),
-                  },
-                })
-              }
-              className="text-sm"
-              placeholder="0"
-            />
-          </div>
-
-          {/* Bottom */}
-          <div className="space-y-2">
-            <Label htmlFor="layout-bottom" className="text-xs text-gray-600">
-              Bottom
-            </Label>
-            <Input
-              id="layout-bottom"
-              type="number"
-              min="-1000"
-              max="1000"
-              value={sequence.config.pos?.bottom}
-              onChange={(e) =>
-                updateTextConfig(sequence.id, {
-                  pos: {
-                    ...sequence.config.pos,
-                    bottom: Number(e.target.value),
                   },
                 })
               }

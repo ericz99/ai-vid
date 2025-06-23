@@ -3,13 +3,9 @@ import { create } from "zustand";
 import { RefObject } from "react";
 import { Caption } from "@remotion/captions";
 import { TRACKS } from "../constants";
+import React from "react";
 
-type SequenceType =
-  | "text"
-  | "subtitles"
-  | "video"
-  | "audio-transition"
-  | "image";
+type SequenceType = "text" | "video" | "audio-transition" | "image";
 
 interface BaseSequence {
   id: string;
@@ -45,13 +41,6 @@ export interface ImageSequence extends BaseSequence {
   type: "image";
   src: string;
 
-  pos?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
-  };
-
   scale?: number; // default: 1
 
   opacity?: number; // 0 to 1
@@ -72,12 +61,12 @@ interface TimelineConfig {
   fps: number;
 }
 
-interface TextConfig {
+interface TextConfig extends React.CSSProperties {
   pos?: {
-    left?: number;
-    top?: number;
-    right?: number;
-    bottom?: number;
+    left?: number | string;
+    top?: number | string;
+    right?: number | string;
+    bottom?: number | string;
   };
   width?: number;
   color?: string;

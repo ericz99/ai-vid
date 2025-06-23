@@ -166,9 +166,10 @@ export function PageClient({
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-        {seq && seq?.track === TRACKS.TEXT && (
-          <TextTools sequence={seq as TextSequence} />
-        )}
+        {seq &&
+          (seq?.track === TRACKS.TEXT || seq?.track === TRACKS.SUBTITLES) && (
+            <TextTools sequence={seq as TextSequence} />
+          )}
 
         {seq && seq?.track === TRACKS.IMAGE && (
           <MediaTools sequence={seq as ImageSequence} />
