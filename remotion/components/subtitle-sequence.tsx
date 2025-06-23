@@ -72,6 +72,7 @@ const TextChunk = ({
   fromMs: number;
   currentTimeMs: number;
   fps: number;
+  sequence: ITextSequence;
 }) => {
   const frame = useCurrentFrame(); // Scoped to chunk's sequence
 
@@ -174,6 +175,7 @@ export const SubtitleSequence = memo(
                   fromMs={fromMs}
                   currentTimeMs={currentTimeMs}
                   fps={fps}
+                  sequence={sequence}
                 />
               </Sequence>
             );

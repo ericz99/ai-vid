@@ -19,12 +19,17 @@ import { Main } from "@/remotion/main";
 import { AbsoluteFill } from "remotion";
 import LoadingSpinner from "@/components/spinner";
 import { parseMedia } from "@remotion/media-parser";
-import { TextSequence, useTimelineStore } from "@/remotion/store";
+import {
+  ImageSequence,
+  TextSequence,
+  useTimelineStore,
+} from "@/remotion/store";
 import { SequenceTimeline } from "@/components/sequence-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Subtitles } from "@/components/subtitles";
 import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
+import { MediaTools } from "@/components/tools/media-tools";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -163,6 +168,10 @@ export function PageClient({
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
         {seq && seq?.track === TRACKS.TEXT && (
           <TextTools sequence={seq as TextSequence} />
+        )}
+
+        {seq && seq?.track === TRACKS.IMAGE && (
+          <MediaTools sequence={seq as ImageSequence} />
         )}
       </div>
 

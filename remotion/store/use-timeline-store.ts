@@ -118,6 +118,9 @@ interface TimelineStore {
 
   preset: string | null;
   setPreset: (preset: string) => void;
+
+  // # for images
+  updateImageConfig: (id: string, state: Partial<ImageSequence>) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
@@ -272,6 +275,25 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
           ...(seq.config ?? {}),
           ...(config ?? {}),
         },
+      };
+
+      return {
+        sequences: {
+          ...state.sequences,
+          [id]: updatedSequence,
+        },
+      };
+    }),
+
+  updateImageConfig: (id, config) =>
+    set((state) => {
+      const seq = state.sequences[id];
+
+      if (!seq || seq.type !== "image") return {};
+
+      const updatedSequence: ImageSequence = {
+        ...seq,
+        ...config,
       };
 
       return {
