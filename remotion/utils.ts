@@ -1,11 +1,27 @@
-import { convertMedia } from "@remotion/webcodecs";
+export type WordToken = {
+  word: string;
+  fromMs: number;
+  toMs: number;
+};
 
-export const convertVideoAudioToWav = async (src: string) => {
-  const output = await convertMedia({
-    src,
-    container: "wav",
+export function chunkArrayWithTiming(
+  array: string[],
+  totalDurationMs: number,
+  chunkSize: number
+): WordToken[][] {
+  const totalWords = array.length;
+  const durationPerWord = totalDurationMs / totalWords;
+
+  const wordTokens: WordToken[] = array.map((word, index) => {
+    const fromMs = index * durationPerWord;
+    const toMs = fromMs + durationPerWord;
+    return { word, fromMs, toMs };
   });
 
-  const blob = await output.save();
-  return blob;
-};
+  const result: WordToken[][] = [];
+  for (let i = 0; i < wordTokens.length; i += chunkSize) {
+    result.push(wordTokens.slice(i, i + chunkSize));
+  }
+
+  return result;
+}

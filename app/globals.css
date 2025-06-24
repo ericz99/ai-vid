@@ -149,3 +149,9 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #413c40;
 }
+
+
+.visual-timeline *::selection {
+  background: #f4a261;
+  color: #fff;
+}

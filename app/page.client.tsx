@@ -30,6 +30,7 @@ import { Subtitles } from "@/components/subtitles";
 import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
 import { MediaTools } from "@/components/tools/media-tools";
+import { VisualTimeline } from "@/components/visual-timeline";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -150,12 +151,17 @@ export function PageClient({
         <Tabs defaultValue="sequence">
           <TabsList className="w-full">
             <TabsTrigger value="sequence">Sequence</TabsTrigger>
+            <TabsTrigger value="visuals">Visuals</TabsTrigger>
             <TabsTrigger value="subtitles">Subtitles</TabsTrigger>
             <TabsTrigger value="audio">Audio</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sequence">
             <SequenceTimeline />
+          </TabsContent>
+
+          <TabsContent value="visuals">
+            <VisualTimeline />
           </TabsContent>
 
           <TabsContent value="subtitles">
