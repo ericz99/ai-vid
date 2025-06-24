@@ -20,6 +20,8 @@ import { AbsoluteFill } from "remotion";
 import LoadingSpinner from "@/components/spinner";
 import { parseMedia } from "@remotion/media-parser";
 import {
+  HighlightBRollSequence,
+  HighlightOverlaySequence,
   HighlightTextSequence,
   HighlightType,
   ImageSequence,
@@ -151,13 +153,24 @@ export function PageClient({
     }
   }, [sequences, selectedSequenceId]);
 
-  const highlightTextSequence = useMemo(() => {
+  const highlightSequence = useMemo(() => {
     if (selectedHighlightFrame) {
-      return highlightSequences[
-        `text-${selectedHighlightFrame}`
-      ] as HighlightTextSequence;
+      console.log("selectedHighlightFrame", selectedHighlightFrame);
+      const [type, range] = selectedHighlightFrame.split("-");
+
+      if (type === "text") {
+        return highlightSequences[`text-${range}`] as HighlightTextSequence;
+      } else if (type === "overlay") {
+        return highlightSequences[
+          `overlay-${range}`
+        ] as HighlightOverlaySequence;
+      } else if (type === "broll") {
+        return highlightSequences[`broll-${range}`] as HighlightBRollSequence;
+      }
     }
   }, [selectedHighlightFrame, highlightSequences]);
+
+  console.log("highlightSequence", highlightSequence);
 
   return (
     <div className="md:max-w-full lg:max-w-8xl lg:container lg:mx-auto flex gap-4 h-screen overflow-hidden p-4">
@@ -201,8 +214,10 @@ export function PageClient({
 
       {selectedType && selectedType === "text" && (
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-          {highlightTextSequence && (
-            <HighlightTextTools sequence={highlightTextSequence} />
+          {highlightSequence && (
+            <HighlightTextTools
+              sequence={highlightSequence as HighlightTextSequence}
+            />
           )}
         </div>
       )}

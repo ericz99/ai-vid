@@ -92,12 +92,12 @@ const TextChunk = ({
           const wordStart = fromMs + fromMsWord;
           const wordEnd = fromMs + toMsWord;
           for (const key of highlightKeys) {
-            const [, range] = key.split("-");
+            const [type, range] = key.split("-");
             if (!range) continue;
             const [from, to] = range.split(":").map(Number);
             if (wordEnd > from && wordStart < to) {
               isHighlighted = true;
-              highlightKeyForWord = `${from}:${to}`;
+              highlightKeyForWord = `${type}-${from}:${to}`;
               break;
             }
           }
@@ -265,6 +265,11 @@ export function VisualTimeline({
 
         const openDropdown = highlightSelected || hoveredHighlightInSeq;
 
+        const data: [string, string] | null =
+          hoveredHighlightKey !== null
+            ? (hoveredHighlightKey.split("-") as [string, string])
+            : null;
+
         return (
           <DropdownMenu
             key={seq.id}
@@ -309,70 +314,121 @@ export function VisualTimeline({
                 })}
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelected("overlay");
-                  addHighlightSequence(seq.id, {
-                    type: "overlay",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `overlay-${selectedHighlightFrame}`,
-                    overlaySrc: "",
-                    track: TRACKS.OVERLAY,
-                  });
-                }}
-              >
-                <Layers size={18} />
-                Add Overlay
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelected("b-roll");
-                  addHighlightSequence(seq.id, {
-                    type: "b-roll",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `broll-${selectedHighlightFrame}`,
-                    videoSrc: "",
-                    muteAudio: false,
-                    track: TRACKS.BROLL,
-                  });
-                }}
-              >
-                <Video size={18} />
-                Add B-Roll
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelected("text");
-                  addHighlightSequence(seq.id, {
-                    type: "text",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `text-${selectedHighlightFrame}`,
-                    text: "",
-                    config: {},
-                    track: TRACKS.TEXT,
-                  });
-                }}
-              >
-                <TypeOutline size={18} />
-                Add Text
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+            {highlightSelected && (
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedHightlightFrame(
+                      `overlay-${selectedHighlightFrame}`
+                    );
+                    setSelected("overlay");
+                    addHighlightSequence(seq.id, {
+                      type: "overlay",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `overlay-${selectedHighlightFrame}`,
+                      overlaySrc: "",
+                      track: TRACKS.OVERLAY,
+                    });
+                  }}
+                >
+                  <Layers size={18} />
+                  Add Overlay
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedHightlightFrame(
+                      `broll-${selectedHighlightFrame}`
+                    );
+
+                    setSelected("b-roll");
+                    addHighlightSequence(seq.id, {
+                      type: "b-roll",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `broll-${selectedHighlightFrame}`,
+                      videoSrc: "",
+                      muteAudio: false,
+                      track: TRACKS.BROLL,
+                    });
+                  }}
+                >
+                  <Video size={18} />
+                  Add B-Roll
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedHightlightFrame(
+                      `text-${selectedHighlightFrame}`
+                    );
+
+                    setSelected("text");
+                    addHighlightSequence(seq.id, {
+                      type: "text",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `text-${selectedHighlightFrame}`,
+                      text: "",
+                      config: {},
+                      track: TRACKS.TEXT,
+                    });
+                  }}
+                >
+                  <TypeOutline size={18} />
+                  Add Text
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            )}
+
+            {hoveredHighlightInSeq && (
+              <DropdownMenuContent>
+                {data && data[0] === "text" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelected("text");
+                      setSelectedHightlightFrame(hoveredHighlightKey);
+                    }}
+                  >
+                    Edit Text
+                  </DropdownMenuItem>
+                )}
+
+                {data && data[0] === "overlay" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelected("overlay");
+
+                      setSelectedHightlightFrame(hoveredHighlightKey);
+                    }}
+                  >
+                    Edit Overlay
+                  </DropdownMenuItem>
+                )}
+
+                {data && data[0] === "broll" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelected("b-roll");
+                      setSelectedHightlightFrame(hoveredHighlightKey);
+                    }}
+                  >
+                    Edit B-Roll
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            )}
           </DropdownMenu>
         );
       })}
