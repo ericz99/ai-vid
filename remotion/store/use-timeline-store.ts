@@ -17,7 +17,43 @@ interface BaseSequence {
 
   transitionIn?: "fade" | "slide" | "wipe" | "flip";
   transitionOut?: "fade" | "slide" | "wipe" | "flip";
+
+  // # for custom sequences (highlights)
+  highlightKeys?: string[];
 }
+
+type HighlightSequenceBase = {
+  id: string;
+  fromMs: number;
+  toMs: number;
+  track?: number;
+};
+
+export type HighlightType = HightlightSequence["type"];
+
+export interface HighlightTextSequence extends HighlightSequenceBase {
+  type: "text";
+  text: string;
+  config?: TextConfig;
+  preset?: string | null;
+}
+
+export interface HighlightOverlaySequence extends HighlightSequenceBase {
+  type: "overlay";
+  overlaySrc: string;
+  styleType?: "half" | "full";
+}
+
+export interface HighlightBRollSequence extends HighlightSequenceBase {
+  type: "b-roll";
+  videoSrc: string;
+  muteAudio?: boolean;
+}
+
+export type HightlightSequence =
+  | HighlightTextSequence
+  | HighlightOverlaySequence
+  | HighlightBRollSequence;
 
 export interface TextSequence extends BaseSequence {
   type: "text";
@@ -127,9 +163,22 @@ interface TimelineStore {
 
   // # for images
   updateImageConfig: (id: string, state: Partial<ImageSequence>) => void;
+
+  // # custom sequence when user highlights
+  highlightSequences: Record<string, HightlightSequence>;
+  selectedHighlightFrame: string | null;
+  setSelectedHightlightFrame: (id: string | null) => void;
+  addHighlightSequence: (id: string, sequence: HightlightSequence) => void;
+  removeHighlightSequence: (id: string) => void;
+  updateHighlightSequence: (
+    id: string,
+    updates: Partial<HightlightSequence>
+  ) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
+  highlightSequences: {},
+  selectedHighlightFrame: null,
   preset: null,
 
   enableCaptions: true,
@@ -348,6 +397,76 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
         },
       };
     }),
+
+  addHighlightSequence: (id, seq) =>
+    set((state) => {
+      const newHighlightSequences: Record<string, HightlightSequence> = {
+        ...state.highlightSequences,
+      };
+      newHighlightSequences[seq.id] = seq;
+      return {
+        highlightSequences: newHighlightSequences,
+        sequences: {
+          ...state.sequences,
+          [id]: {
+            ...state.sequences[id],
+            highlightKeys: !state.sequences[id].highlightKeys
+              ? [seq.id]
+              : [...state.sequences[id].highlightKeys!, seq.id],
+          },
+        },
+      };
+    }),
+
+  removeHighlightSequence: (id) =>
+    set((state) => {
+      const updatedHighlightSequences: Record<string, HightlightSequence> = {
+        ...state.highlightSequences,
+      };
+      delete updatedHighlightSequences[id];
+      return { highlightSequences: updatedHighlightSequences };
+    }),
+
+  updateHighlightSequence: (id, updates) =>
+    set((state) => {
+      const existing = state.highlightSequences[id];
+
+      if (!existing) return {};
+
+      // Ensure the type is preserved when updating
+      let updatedSequence: HightlightSequence | undefined;
+      if (existing.type === "text") {
+        updatedSequence = {
+          ...(existing as HighlightTextSequence),
+          ...(updates as Partial<HighlightTextSequence>),
+        };
+      } else if (existing.type === "overlay") {
+        updatedSequence = {
+          ...(existing as HighlightOverlaySequence),
+          ...(updates as Partial<HighlightOverlaySequence>),
+        };
+      } else if (existing.type === "b-roll") {
+        updatedSequence = {
+          ...(existing as HighlightBRollSequence),
+          ...(updates as Partial<HighlightBRollSequence>),
+        };
+      } else {
+        // If type is not recognized, do not update
+        return {};
+      }
+
+      return {
+        highlightSequences: {
+          ...state.highlightSequences,
+          [id]: updatedSequence,
+        },
+      };
+    }),
+
+  setSelectedHightlightFrame: (id) =>
+    set(() => ({
+      selectedHighlightFrame: id,
+    })),
 
   setState: async (partialState) => {
     set((prev) => ({ ...prev, ...partialState }));

@@ -20,6 +20,8 @@ import { AbsoluteFill } from "remotion";
 import LoadingSpinner from "@/components/spinner";
 import { parseMedia } from "@remotion/media-parser";
 import {
+  HighlightTextSequence,
+  HighlightType,
   ImageSequence,
   TextSequence,
   useTimelineStore,
@@ -31,6 +33,7 @@ import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
 import { MediaTools } from "@/components/tools/media-tools";
 import { VisualTimeline } from "@/components/visual-timeline";
+import { HighlightTextTools } from "@/components/custom/text-tools";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -70,9 +73,12 @@ export function PageClient({
     setCurrentFrame,
     selectedSequenceId,
     sequences,
+    selectedHighlightFrame,
+    highlightSequences,
   } = useTimelineStore();
   const playerRef = useRef<PlayerRef>(null);
   const [isPreloaded, setPreload] = useState(false);
+  const [selectedType, setSelected] = useState<HighlightType | null>(null);
 
   useEffect(() => {
     if (config || subtitles) {
@@ -145,8 +151,16 @@ export function PageClient({
     }
   }, [sequences, selectedSequenceId]);
 
+  const highlightTextSequence = useMemo(() => {
+    if (selectedHighlightFrame) {
+      return highlightSequences[
+        `text-${selectedHighlightFrame}`
+      ] as HighlightTextSequence;
+    }
+  }, [selectedHighlightFrame, highlightSequences]);
+
   return (
-    <div className="flex gap-4 h-screen overflow-hidden p-4">
+    <div className="md:max-w-full lg:max-w-8xl lg:container lg:mx-auto flex gap-4 h-screen overflow-hidden p-4">
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
         <Tabs defaultValue="sequence">
           <TabsList className="w-full">
@@ -161,7 +175,9 @@ export function PageClient({
           </TabsContent>
 
           <TabsContent value="visuals">
-            <VisualTimeline />
+            <VisualTimeline
+              setSelected={(type: HighlightType) => setSelected(type)}
+            />
           </TabsContent>
 
           <TabsContent value="subtitles">
@@ -180,6 +196,26 @@ export function PageClient({
           {seq && seq?.track === TRACKS.IMAGE && (
             <MediaTools sequence={seq as ImageSequence} />
           )}
+        </div>
+      )}
+
+      {selectedType && selectedType === "text" && (
+        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+          {highlightTextSequence && (
+            <HighlightTextTools sequence={highlightTextSequence} />
+          )}
+        </div>
+      )}
+
+      {selectedType && selectedType === "overlay" && (
+        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+          Overlay
+        </div>
+      )}
+
+      {selectedType && selectedType === "b-roll" && (
+        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+          B-roll
         </div>
       )}
 

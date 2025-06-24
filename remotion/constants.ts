@@ -5,4 +5,6 @@ export const TRACKS = {
   IMAGE: 3,
   TRANSITION: 4,
   AUDIO: 5,
+  OVERLAY: 6,
+  BROLL: 7,
 };
