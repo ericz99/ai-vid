@@ -75,6 +75,22 @@ interface TextConfig extends React.CSSProperties {
   fontSize?: number;
 }
 
+interface SubtitleTextConfig extends React.CSSProperties {
+  pos?: {
+    left?: number | string;
+    top?: number | string;
+    right?: number | string;
+    bottom?: number | string;
+  };
+  width?: number;
+  color?: string;
+  bounceColor?: string;
+  isBold?: boolean;
+  isItalic?: boolean;
+  fontSize?: number;
+  captionTextPreset?: string | null;
+}
+
 interface TimelineStore {
   enableCaptions: boolean;
   setEnableCaptions: (checked: boolean) => void;
@@ -91,8 +107,10 @@ interface TimelineStore {
   config: TimelineConfig | null;
   setConfig: (config: TimelineConfig) => void;
 
+  captionTextConfig: SubtitleTextConfig;
   captions: Caption[];
   setCaptions: (captions: Caption[]) => void;
+  updateSubtitleConfig: (config: Partial<SubtitleTextConfig>) => void;
 
   sequences: Record<string, SequenceObject>;
   addSequence: (sequence: SequenceObject) => void;
@@ -140,11 +158,31 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
 
   config: null,
   captions: [],
-
+  captionTextPreset: null,
+  captionTextConfig: {
+    isBold: false,
+    isItalic: false,
+    pos: {
+      top: "50%",
+      left: "50%",
+    },
+    transform: "translate(-50%, -50%)",
+    fontSize: 24,
+  },
   setCaptions: (captions: Caption[]) =>
     set(() => ({
       captions,
     })),
+
+  updateSubtitleConfig: (config: Partial<SubtitleTextConfig>) =>
+    set((state) => {
+      return {
+        captionTextConfig: {
+          ...state.captionTextConfig,
+          ...config,
+        },
+      };
+    }),
 
   setConfig: (config: TimelineConfig) =>
     set(() => ({

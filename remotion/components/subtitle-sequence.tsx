@@ -156,8 +156,6 @@ export const SubtitleSequence = memo(
     const fromFrame = (fromMs / 1000) * fps;
     const durationInFrames = (durationMs / 1000) * fps;
 
-    console.log("config", config);
-
     return (
       <Sequence from={fromFrame} durationInFrames={durationInFrames}>
         <AbsoluteFill

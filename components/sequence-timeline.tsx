@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useTimelineStore } from "@/remotion/store";
 import { msToSeconds } from "@/lib/utils";
 import Image from "next/image";
@@ -15,6 +21,8 @@ export function SequenceTimeline() {
   const fps = useTimelineStore((s) => s.config?.fps ?? 30);
   const enableCaptions = useTimelineStore((s) => s.enableCaptions);
   const [currentMs, setCurrentMs] = useState(0);
+
+  const sequenceRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     if (currentFrame) {
@@ -42,6 +50,19 @@ export function SequenceTimeline() {
     [playerRef, setCurrentFrame]
   );
 
+  useEffect(() => {
+    // Find the active sequence
+    const activeSeq = sortedSequences.find(
+      (seq) => seq.fromMs <= currentMs && seq.toMs > currentMs
+    );
+    if (activeSeq && sequenceRefs.current[activeSeq.id]) {
+      sequenceRefs.current[activeSeq.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [currentMs, sortedSequences]);
+
   return (
     <div className="h-full w-full p-2 space-y-2">
       {sortedSequences.map((seq) => {
@@ -51,6 +72,9 @@ export function SequenceTimeline() {
         return (
           <div
             key={seq.id}
+            ref={(el) => {
+              sequenceRefs.current[seq.id] = el;
+            }}
             onClick={() => {
               console.log("frame", fromFrame);
               setSelected(seq.id);
@@ -74,7 +98,10 @@ export function SequenceTimeline() {
 
             <div className="flex-1 flex flex-col gap-2">
               <div>
-                <strong>{seq.type.toUpperCase()}</strong> — {seq.id}
+                <strong className="bg-amber-700 text-white p-1 rounded text-xs">
+                  {seq.type.toUpperCase()}
+                </strong>{" "}
+                — {seq.id}
               </div>
               <div>
                 From: {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s

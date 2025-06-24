@@ -165,16 +165,17 @@ export function PageClient({
         </Tabs>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-        {seq &&
-          (seq?.track === TRACKS.TEXT || seq?.track === TRACKS.SUBTITLES) && (
+      {selectedSequenceId && seq?.track !== TRACKS.SUBTITLES && (
+        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+          {seq && seq?.track === TRACKS.TEXT && (
             <TextTools sequence={seq as TextSequence} />
           )}
 
-        {seq && seq?.track === TRACKS.IMAGE && (
-          <MediaTools sequence={seq as ImageSequence} />
-        )}
-      </div>
+          {seq && seq?.track === TRACKS.IMAGE && (
+            <MediaTools sequence={seq as ImageSequence} />
+          )}
+        </div>
+      )}
 
       <div className="flex-1 flex items-center justify-center p-2">
         <div className="h-full w-full relative flex justify-center items-center">

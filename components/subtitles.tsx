@@ -5,13 +5,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTimelineStore } from "@/remotion/store";
 import { Separator } from "./ui/separator";
+import { SubtitlesTools } from "./tools/subtitles-tools";
 
 export function Subtitles() {
   const enableCaptions = useTimelineStore((s) => s.enableCaptions);
   const setEnableCaptions = useTimelineStore((s) => s.setEnableCaptions);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 p-2">
       <div className="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
@@ -34,6 +35,8 @@ export function Subtitles() {
       </div>
 
       <Separator />
+
+      {enableCaptions && <SubtitlesTools />}
     </div>
   );
 }
