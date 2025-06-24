@@ -162,6 +162,9 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             <Label htmlFor="layout-top" className="text-xs text-gray-600">
               Top / Bottom
             </Label>
+
+            <span className="text-sm">{sequence.config.pos?.top ?? 0}</span>
+
             <Input
               id="layout-top"
               type="range"
@@ -187,6 +190,9 @@ export function TextTools({ sequence }: { sequence: ITextSequence }) {
             <Label htmlFor="layout-left" className="text-xs text-gray-600">
               Left / Right
             </Label>
+
+            <span className="text-sm">{sequence.config.pos?.left ?? 0}</span>
+
             <Input
               id="layout-left"
               type="range"
