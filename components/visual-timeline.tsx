@@ -66,9 +66,9 @@ const TextChunk = ({
         width: "100%",
         display: "flex",
         flexDirection: "row",
-        gap: "4px",
+        // gap: "4px",
         userSelect: "text",
-        marginRight: 4,
+        // marginRight: 4,
       }}
     >
       {chunk.map(({ word, fromMs: fromMsWord, toMs: toMsWord }, wordIndex) => {
@@ -131,7 +131,7 @@ const TextChunk = ({
                 : undefined,
             }}
             className={cn(
-              "inline-block text-black text-left text-sm transition-all ease-in-out duration-75 select-text",
+              "inline-block px-0.5 text-black text-left text-sm transition-all ease-in-out duration-75 select-text",
               (isHighlighted || isHovered) &&
                 "bg-[#90e0ef] text-white select-none"
             )}
@@ -166,8 +166,10 @@ const TextChunk = ({
 
 export function VisualTimeline({
   setSelected,
+  setDialogOpen,
 }: {
   setSelected: (type: HighlightType) => void;
+  setDialogOpen: (open: boolean) => void;
 }) {
   const sequences = useTimelineStore((s) => s.sequences);
   const currentFrame = useTimelineStore((s) => s.currentFrame);
@@ -396,6 +398,7 @@ export function VisualTimeline({
                 onClick={() => {
                   setSelectedEditSequence(`overlay-${selectedHighlightFrame}`);
                   setSelected("overlay");
+                  setDialogOpen(true);
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
                     {
@@ -420,6 +423,8 @@ export function VisualTimeline({
                 onClick={() => {
                   setSelectedEditSequence(`broll-${selectedHighlightFrame}`);
                   setSelected("broll");
+                  setDialogOpen(true);
+
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
                     {
@@ -445,6 +450,8 @@ export function VisualTimeline({
                 onClick={() => {
                   setSelectedEditSequence(`text-${selectedHighlightFrame}`);
                   setSelected("text");
+                  setDialogOpen(true);
+
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
                     {
@@ -507,6 +514,7 @@ export function VisualTimeline({
                   onClick={() => {
                     setSelected("text");
                     setSelectedEditSequence(hoveredHighlightKey);
+                    setDialogOpen(true);
                   }}
                 >
                   <TypeOutline size={18} />
@@ -519,6 +527,7 @@ export function VisualTimeline({
                   onClick={() => {
                     setSelected("overlay");
                     setSelectedEditSequence(hoveredHighlightKey);
+                    setDialogOpen(true);
                   }}
                 >
                   <Layers size={18} />
@@ -531,6 +540,7 @@ export function VisualTimeline({
                   onClick={() => {
                     setSelected("broll");
                     setSelectedEditSequence(hoveredHighlightKey);
+                    setDialogOpen(true);
                   }}
                 >
                   <Video size={18} />

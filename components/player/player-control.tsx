@@ -12,7 +12,7 @@ export const PlayerControl: React.FC<{
   durationInFrames: number;
 }> = ({ playerRef, fps, durationInFrames }) => {
   return (
-    <div className="w-full relative flex flex-col p-2 bg-[#ffffff] rounded-b-lg border">
+    <div className="w-full relative flex flex-col p-2 bg-[#ffffff] rounded-lg border">
       <SeekBar playerRef={playerRef} durationInFrames={durationInFrames} />
 
       <div className="flex items-center">

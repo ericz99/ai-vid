@@ -37,6 +37,15 @@ import { VisualTimeline } from "@/components/visual-timeline";
 import { PlayerControl } from "@/components/player/player-control";
 // import { HighlightTextTools } from "@/components/custom/text-tools";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
     src: src,
@@ -81,6 +90,7 @@ export function PageClient({
   const playerRef = useRef<PlayerRef>(null);
   const [isPreloaded, setPreload] = useState(false);
   const [selectedType, setSelected] = useState<HighlightType | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (config || subtitles) {
@@ -177,9 +187,11 @@ export function PageClient({
   // ✅ TODO: in the handleSelection, it needs to make sure it highlights the whole word, for example "I also got their bacon cheese hot do", we're missing the g, g should be zone as well since its a whole word
   // ✅ TODO: we need to be able to select from multiple range, if we select from one line, we should be able to select with the current select the second line
   // ✅ TODO: if we were to click something it should jump to frame, but if we clicked on a highlighted (ALREADY HIGHLIGHTED) text, it should no open the default dropdown
+  // TODO: cursor from beginning to end, i want to be able to reselect remove or add more  from a range
 
   console.log("highlightSequence", highlightSequence);
   console.log("seq type", selectedType);
+  console.log("dialog open", dialogOpen);
 
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
@@ -201,6 +213,7 @@ export function PageClient({
               <TabsContent value="visuals" className="h-full">
                 <VisualTimeline
                   setSelected={(type: HighlightType) => setSelected(type)}
+                  setDialogOpen={(open) => setDialogOpen(open)}
                 />
               </TabsContent>
 
@@ -282,6 +295,38 @@ export function PageClient({
           )}
         </div>
       </div>
+
+      {dialogOpen && (
+        <Dialog
+          open={dialogOpen}
+          defaultOpen={false}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDialogOpen(false);
+            }
+          }}
+        >
+          <DialogTrigger asChild>
+            <button
+              style={{
+                width: 1,
+                height: 1,
+                opacity: 0,
+                pointerEvents: "none",
+              }}
+            />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
