@@ -158,7 +158,7 @@ export function PageClient({
       console.log("selectedHighlightFrame", selectedHighlightFrame);
       const [type, range] = selectedHighlightFrame.split("-");
 
-      setSelected(type as HighlightType);
+      // setSelected(type as HighlightType);
 
       if (type === "text") {
         return highlightSequences[`text-${range}`] as HighlightTextSequence;
@@ -173,7 +173,13 @@ export function PageClient({
   }, [selectedHighlightFrame, highlightSequences]);
 
   console.log("selectedType", selectedType);
+  console.log("highlightSequences", highlightSequences);
 
+  // TODO: if hoverHighlightKey in mapper already or in highlightSequences then ignore do not open  drop down
+  // TODO: cannot add duplicate highlight for example broll-24935:26935 text-24935:26935
+  // ✅ TODO: in the handleSelection, it needs to make sure it highlights the whole word, for example "I also got their bacon cheese hot do", we're missing the g, g should be zone as well since its a whole word
+  // ✅ TODO: we need to be able to select from multiple range, if we select from one line, we should be able to select with the current select the second line
+  // ✅ TODO: if we were to click something it should jump to frame, but if we clicked on a highlighted (ALREADY HIGHLIGHTED) text, it should no open the default dropdown
   return (
     <div className="md:max-w-full lg:max-w-8xl lg:container lg:mx-auto flex gap-4 h-screen overflow-hidden p-4">
       <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">

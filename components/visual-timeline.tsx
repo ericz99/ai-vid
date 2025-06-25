@@ -14,7 +14,7 @@ import {
 } from "@/remotion/store";
 import { chunkArrayWithTiming, WordToken } from "@/remotion/utils";
 import { TRACKS } from "@/remotion/constants";
-import { cn, msToSeconds } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -36,7 +36,6 @@ const TextChunk = ({
   hoveredHighlightKey,
   setHoveredHighlightKey,
   setHoverDropdownPos,
-  setSelectedHightlightFrame,
   id,
 }: {
   chunk: WordToken[];
@@ -64,7 +63,6 @@ const TextChunk = ({
         display: "flex",
         flexDirection: "row",
         gap: "4px",
-        fontSize: 24,
         userSelect: "text",
       }}
     >
@@ -121,7 +119,6 @@ const TextChunk = ({
             data-to-ms={fromMs + toMsWord}
             style={{
               color: isActive ? "#f4a261" : "#000000",
-              userSelect: "text",
               backgroundColor: isHovered
                 ? "#2779bd" // darker blue on hover
                 : isHighlighted
@@ -129,8 +126,9 @@ const TextChunk = ({
                 : undefined,
             }}
             className={cn(
-              "text-black text-left text-base transition-all ease-in-out duration-75",
-              (isHighlighted || isHovered) && "bg-[#90e0ef] text-white"
+              "text-black text-left text-sm transition-all ease-in-out duration-75 select-text",
+              (isHighlighted || isHovered) &&
+                "bg-[#90e0ef] text-white select-none"
             )}
             onClick={(e) => {
               e.preventDefault();
@@ -138,7 +136,7 @@ const TextChunk = ({
 
               if (isHighlighted) {
                 setHoveredHighlightKey(highlightKeyForWord);
-                setSelectedHightlightFrame(highlightKeyForWord);
+                // setSelectedHightlightFrame(highlightKeyForWord);
 
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
 
@@ -188,7 +186,7 @@ export function VisualTimeline({
     top: number;
   } | null>(null);
 
-  const [selectedSeq, setSelectedSeq] = useState<ITextSequence | null>(null);
+  const [selectedSeq, setSelectedSeq] = useState<ITextSequence[]>([]);
   const sequenceRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -231,7 +229,7 @@ export function VisualTimeline({
     if (!selection || selection.isCollapsed) {
       setSelectedHightlightFrame(null);
       setDropdownPos(null);
-      setSelectedSeq(null);
+      setSelectedSeq([]);
 
       return;
     }
@@ -256,28 +254,47 @@ export function VisualTimeline({
     });
 
     if (selectedSpans.length > 0) {
+      // Sort by time
+      selectedSpans.sort(
+        (a, b) =>
+          Number(a.getAttribute("data-from-ms")) -
+          Number(b.getAttribute("data-from-ms"))
+      );
       const fromMs = Number(selectedSpans[0].getAttribute("data-from-ms"));
       const toMs = Number(
         selectedSpans[selectedSpans.length - 1].getAttribute("data-to-ms")
       );
-      console.log("Selected fromMs:", fromMs, "toMs:", toMs);
       setSelectedHightlightFrame(`${fromMs}:${toMs}`);
-      const seqId = selectedSpans[0]
-        .closest("[data-seq-id]")
-        ?.getAttribute("data-seq-id");
-      const foundSeq = sortedSequences.find((s) => String(s.id) === seqId);
-      setSelectedSeq(foundSeq ?? null);
+
+      // Collect all unique sequence IDs from selected spans
+      const seqIds = [
+        ...new Set(
+          selectedSpans
+            .map((span) =>
+              span.closest("[data-seq-id]")?.getAttribute("data-seq-id")
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+      // Find all matching sequences
+      const foundSeqs = sortedSequences.filter((s) =>
+        seqIds.includes(String(s.id))
+      );
+      setSelectedSeq(foundSeqs);
     } else {
-      setSelectedSeq(null);
+      setSelectedSeq([]);
     }
   }, [setSelectedHightlightFrame, sortedSequences]);
 
   const data = hoveredHighlightKey ? hoveredHighlightKey.split("-") : null;
 
-  console.log("hoveredHighlightKey", hoveredHighlightKey);
+  console.log("selectedSeq", selectedSeq);
+  console.log("sortedSequences", sortedSequences);
+  console.log("selectedHighlightFrame", selectedHighlightFrame);
 
   return (
-    <div className="h-full w-full p-2 space-y-2 flex flex-col gap-2 items-start visual-timeline">
+    <div className="h-full w-full p-2 space-y-2 flex flex-col items-start visual-timeline">
       {sortedSequences.map((seq) => {
         const words = seq.text.split(" ").filter((word) => word.length > 0);
         const wordChucks = chunkArrayWithTiming(
@@ -298,11 +315,6 @@ export function VisualTimeline({
             // }}
             className="flex flex-col gap-2"
           >
-            <div className="text-sm">
-              {"["}
-              {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s{"]"}
-            </div>
-
             {wordChucks.map((chunk, index) => {
               return (
                 <TextChunk
@@ -329,7 +341,7 @@ export function VisualTimeline({
         );
       })}
 
-      {dropdownPos && selectedHighlightFrame && selectedSeq && (
+      {dropdownPos && selectedHighlightFrame && (
         <div
           style={{
             position: "absolute",
@@ -345,7 +357,7 @@ export function VisualTimeline({
               if (!open) {
                 setSelectedHightlightFrame(null);
                 setDropdownPos(null);
-                setSelectedSeq(null);
+                setSelectedSeq([]);
               }
             }}
           >
@@ -366,18 +378,21 @@ export function VisualTimeline({
                     `overlay-${selectedHighlightFrame}`
                   );
                   setSelected("overlay");
-                  addHighlightSequence(selectedSeq.id, {
-                    type: "overlay",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `overlay-${selectedHighlightFrame}`,
-                    overlaySrc: "",
-                    track: TRACKS.OVERLAY,
-                  });
+                  addHighlightSequence(
+                    selectedSeq.map((s) => s.id),
+                    {
+                      type: "overlay",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `overlay-${selectedHighlightFrame}`,
+                      overlaySrc: "",
+                      track: TRACKS.OVERLAY,
+                    }
+                  );
                 }}
               >
                 <Layers size={18} />
@@ -388,19 +403,22 @@ export function VisualTimeline({
                   setSelectedHightlightFrame(`broll-${selectedHighlightFrame}`);
 
                   setSelected("broll");
-                  addHighlightSequence(selectedSeq.id, {
-                    type: "broll",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `broll-${selectedHighlightFrame}`,
-                    videoSrc: "",
-                    muteAudio: false,
-                    track: TRACKS.BROLL,
-                  });
+                  addHighlightSequence(
+                    selectedSeq.map((s) => s.id),
+                    {
+                      type: "broll",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `broll-${selectedHighlightFrame}`,
+                      videoSrc: "",
+                      muteAudio: false,
+                      track: TRACKS.BROLL,
+                    }
+                  );
                 }}
               >
                 <Video size={18} />
@@ -411,19 +429,22 @@ export function VisualTimeline({
                   setSelectedHightlightFrame(`text-${selectedHighlightFrame}`);
 
                   setSelected("text");
-                  addHighlightSequence(selectedSeq.id, {
-                    type: "text",
-                    fromMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[0])
-                      : 0,
-                    toMs: selectedHighlightFrame
-                      ? Number(selectedHighlightFrame.split(":")[1])
-                      : 0,
-                    id: `text-${selectedHighlightFrame}`,
-                    text: "",
-                    config: {},
-                    track: TRACKS.TEXT,
-                  });
+                  addHighlightSequence(
+                    selectedSeq.map((s) => s.id),
+                    {
+                      type: "text",
+                      fromMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[0])
+                        : 0,
+                      toMs: selectedHighlightFrame
+                        ? Number(selectedHighlightFrame.split(":")[1])
+                        : 0,
+                      id: `text-${selectedHighlightFrame}`,
+                      text: "",
+                      config: {},
+                      track: TRACKS.TEXT,
+                    }
+                  );
                 }}
               >
                 <TypeOutline size={18} />
@@ -451,7 +472,7 @@ export function VisualTimeline({
                 setSelectedHightlightFrame(null);
                 setHoveredHighlightKey(null);
                 setDropdownPos(null);
-                setSelectedSeq(null);
+                setSelectedSeq([]);
               }
             }}
           >
@@ -482,7 +503,6 @@ export function VisualTimeline({
                 <DropdownMenuItem
                   onClick={() => {
                     setSelected("overlay");
-
                     setSelectedHightlightFrame(hoveredHighlightKey);
                   }}
                 >

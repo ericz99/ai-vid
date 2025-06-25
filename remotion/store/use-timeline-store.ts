@@ -19,7 +19,7 @@ interface BaseSequence {
   transitionOut?: "fade" | "slide" | "wipe" | "flip";
 
   // # for custom sequences (highlights)
-  highlightKeys?: string[];
+  highlightKeys?: string[]; // SHOULD NOT BE IN HERE BECAUSE WHAT IF WE WANT TO HIGHLIGHT 2 SEQUENCES AT TEH SAME TIME, WE CANT DO THAT
 }
 
 type HighlightSequenceBase = {
@@ -168,7 +168,7 @@ interface TimelineStore {
   highlightSequences: Record<string, HightlightSequence>;
   selectedHighlightFrame: string | null;
   setSelectedHightlightFrame: (id: string | null) => void;
-  addHighlightSequence: (id: string, sequence: HightlightSequence) => void;
+  addHighlightSequence: (id: string[], sequence: HightlightSequence) => void;
   removeHighlightSequence: (id: string) => void;
   updateHighlightSequence: (
     id: string,
@@ -398,23 +398,29 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       };
     }),
 
-  addHighlightSequence: (id, seq) =>
+  addHighlightSequence: (ids, seq) =>
     set((state) => {
       const newHighlightSequences: Record<string, HightlightSequence> = {
         ...state.highlightSequences,
       };
       newHighlightSequences[seq.id] = seq;
+
+      // Update highlightKeys for each sequence in ids array
+      const newSequences = { ...state.sequences };
+      ids.forEach((id) => {
+        const sequence = state.sequences[id];
+        if (!sequence) return;
+        newSequences[id] = {
+          ...sequence,
+          highlightKeys: !sequence.highlightKeys
+            ? [seq.id]
+            : [...sequence.highlightKeys, seq.id],
+        };
+      });
+
       return {
         highlightSequences: newHighlightSequences,
-        sequences: {
-          ...state.sequences,
-          [id]: {
-            ...state.sequences[id],
-            highlightKeys: !state.sequences[id].highlightKeys
-              ? [seq.id]
-              : [...state.sequences[id].highlightKeys!, seq.id],
-          },
-        },
+        sequences: newSequences,
       };
     }),
 
