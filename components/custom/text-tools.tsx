@@ -65,7 +65,7 @@ export function HighlightTextTools({
           <Input
             id="text"
             type="text"
-            value={sequence.text}
+            value={sequence.text ?? ""}
             placeholder="Example Text"
             onChange={(e) => {
               updateHighlightSequence(sequence.id, {

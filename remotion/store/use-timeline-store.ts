@@ -166,7 +166,11 @@ interface TimelineStore {
 
   // # custom sequence when user highlights
   highlightSequences: Record<string, HightlightSequence>;
+  selectedEditSequence: string | null;
   selectedHighlightFrame: string | null;
+  hoveredHighlightKey: string | null;
+  setSelectedEditSequence: (id: string | null) => void;
+  setHoveredHighlightKey: (id: string | null) => void;
   setSelectedHightlightFrame: (id: string | null) => void;
   addHighlightSequence: (id: string[], sequence: HightlightSequence) => void;
   removeHighlightSequence: (id: string) => void;
@@ -178,7 +182,9 @@ interface TimelineStore {
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
   highlightSequences: {},
+  selectedEditSequence: null,
   selectedHighlightFrame: null,
+  hoveredHighlightKey: null,
   preset: null,
 
   enableCaptions: true,
@@ -472,6 +478,16 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   setSelectedHightlightFrame: (id) =>
     set(() => ({
       selectedHighlightFrame: id,
+    })),
+
+  setHoveredHighlightKey: (id) =>
+    set(() => ({
+      hoveredHighlightKey: id,
+    })),
+
+  setSelectedEditSequence: (id) =>
+    set(() => ({
+      selectedEditSequence: id,
     })),
 
   setState: async (partialState) => {

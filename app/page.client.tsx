@@ -28,14 +28,14 @@ import {
   TextSequence,
   useTimelineStore,
 } from "@/remotion/store";
-import { SequenceTimeline } from "@/components/sequence-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Subtitles } from "@/components/subtitles";
 import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
 import { MediaTools } from "@/components/tools/media-tools";
 import { VisualTimeline } from "@/components/visual-timeline";
-import { HighlightTextTools } from "@/components/custom/text-tools";
+import { PlayerControl } from "@/components/player/player-control";
+// import { HighlightTextTools } from "@/components/custom/text-tools";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -75,8 +75,8 @@ export function PageClient({
     setCurrentFrame,
     selectedSequenceId,
     sequences,
-    selectedHighlightFrame,
     highlightSequences,
+    selectedEditSequence,
   } = useTimelineStore();
   const playerRef = useRef<PlayerRef>(null);
   const [isPreloaded, setPreload] = useState(false);
@@ -154,9 +154,9 @@ export function PageClient({
   }, [sequences, selectedSequenceId]);
 
   const highlightSequence = useMemo(() => {
-    if (selectedHighlightFrame) {
-      console.log("selectedHighlightFrame", selectedHighlightFrame);
-      const [type, range] = selectedHighlightFrame.split("-");
+    if (selectedEditSequence) {
+      console.log("selectedEditSequence", selectedEditSequence);
+      const [type, range] = selectedEditSequence.split("-");
 
       // setSelected(type as HighlightType);
 
@@ -170,102 +170,115 @@ export function PageClient({
         return highlightSequences[`broll-${range}`] as HighlightBRollSequence;
       }
     }
-  }, [selectedHighlightFrame, highlightSequences]);
-
-  console.log("selectedType", selectedType);
-  console.log("highlightSequences", highlightSequences);
+  }, [selectedEditSequence, highlightSequences]);
 
   // TODO: if hoverHighlightKey in mapper already or in highlightSequences then ignore do not open  drop down
   // TODO: cannot add duplicate highlight for example broll-24935:26935 text-24935:26935
   // ✅ TODO: in the handleSelection, it needs to make sure it highlights the whole word, for example "I also got their bacon cheese hot do", we're missing the g, g should be zone as well since its a whole word
   // ✅ TODO: we need to be able to select from multiple range, if we select from one line, we should be able to select with the current select the second line
   // ✅ TODO: if we were to click something it should jump to frame, but if we clicked on a highlighted (ALREADY HIGHLIGHTED) text, it should no open the default dropdown
+
+  console.log("highlightSequence", highlightSequence);
+  console.log("seq type", selectedType);
+
   return (
-    <div className="md:max-w-full lg:max-w-8xl lg:container lg:mx-auto flex gap-4 h-screen overflow-hidden p-4">
-      <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-        <Tabs defaultValue="sequence">
-          <TabsList className="w-full">
-            <TabsTrigger value="sequence">Sequence</TabsTrigger>
-            <TabsTrigger value="visuals">Visuals</TabsTrigger>
-            <TabsTrigger value="subtitles">Subtitles</TabsTrigger>
-            <TabsTrigger value="audio">Audio</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="sequence">
-            <SequenceTimeline />
-          </TabsContent>
-
-          <TabsContent value="visuals">
-            <VisualTimeline
-              setSelected={(type: HighlightType) => setSelected(type)}
-            />
-          </TabsContent>
-
-          <TabsContent value="subtitles">
-            <Subtitles />
-          </TabsContent>
-          <TabsContent value="audio">audio</TabsContent>
-        </Tabs>
-      </div>
-
-      {selectedSequenceId && seq?.track !== TRACKS.SUBTITLES && (
+    <div className="flex flex-col justify-center items-center relative h-full">
+      <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-[800px] flex gap-4 overflow-hidden p-4">
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-          {seq && seq?.track === TRACKS.TEXT && (
-            <TextTools sequence={seq as TextSequence} />
-          )}
+          <Tabs
+            defaultValue="visuals"
+            style={{ height: "100%" }}
+            orientation="horizontal"
+          >
+            <TabsList className="w-full">
+              <TabsTrigger value="visuals">Visuals</TabsTrigger>
+              <TabsTrigger value="styles">Styles</TabsTrigger>
+              <TabsTrigger value="subtitles">Subtitles</TabsTrigger>
+              <TabsTrigger value="audio">Audio</TabsTrigger>
+            </TabsList>
 
-          {seq && seq?.track === TRACKS.IMAGE && (
-            <MediaTools sequence={seq as ImageSequence} />
-          )}
+            <div className="max-h-[600px] overflow-y-auto">
+              <TabsContent value="visuals">
+                <VisualTimeline
+                  setSelected={(type: HighlightType) => setSelected(type)}
+                />
+              </TabsContent>
+
+              <TabsContent value="styles">Styles</TabsContent>
+
+              <TabsContent value="subtitles">
+                <Subtitles />
+              </TabsContent>
+              <TabsContent value="audio">audio</TabsContent>
+            </div>
+          </Tabs>
         </div>
-      )}
 
-      {selectedType && selectedType === "text" && (
-        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-          {highlightSequence && (
+        {selectedSequenceId && seq?.track !== TRACKS.SUBTITLES && (
+          <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+            {seq && seq?.track === TRACKS.TEXT && (
+              <TextTools sequence={seq as TextSequence} />
+            )}
+
+            {seq && seq?.track === TRACKS.IMAGE && (
+              <MediaTools sequence={seq as ImageSequence} />
+            )}
+          </div>
+        )}
+
+        {/* {selectedType && selectedType === "text" && highlightSequence && (
+          <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
             <HighlightTextTools
               sequence={highlightSequence as HighlightTextSequence}
             />
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {selectedType && selectedType === "overlay" && (
-        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-          Overlay
-        </div>
-      )}
+        {selectedType && selectedType === "overlay" && highlightSequence && (
+          <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+            Overlay
+          </div>
+        )}
 
-      {selectedType && selectedType === "broll" && (
-        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
-          B-roll
-        </div>
-      )}
+        {selectedType && selectedType === "broll" && highlightSequence && (
+          <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+            B-Roll
+          </div>
+        )} */}
 
-      <div className="flex-1 flex items-center justify-center p-2">
-        <div className="h-full w-full relative flex justify-center items-center">
+        <div className="flex-1 flex flex-col h-full py-3 px-2 w-full bg-zinc-100 border border-zinc-300 rounded-md">
           {!config || !subtitles ? (
-            <div className="flex flex-col justify-center items-center gap-4">
+            <div className="flex h-full flex-col justify-center items-center gap-4">
               <LoadingSpinner size="xl" />
               <span>Loading your video preview</span>
             </div>
           ) : (
-            <Player
-              ref={playerRef}
-              component={Main}
-              durationInFrames={
-                config?.durationInFrames ?? DEFAULT_DURATION_IN_FRAMES
-              }
-              fps={config?.fps ?? DEFAULT_VIDEO_FPS}
-              compositionHeight={config?.height ?? DEFAULT_VIDEO_HEIGHT}
-              compositionWidth={config?.width ?? DEFAULT_VIDEO_WIDTH}
-              renderPoster={renderPoster}
-              showPosterWhenUnplayed
-              controls
-              loop
-              acknowledgeRemotionLicense
-              inputProps={inputProps}
-            />
+            <div className="h-full w-full relative flex flex-col justify-between items-center">
+              <Player
+                ref={playerRef}
+                component={Main}
+                durationInFrames={
+                  config?.durationInFrames ?? DEFAULT_DURATION_IN_FRAMES
+                }
+                fps={config?.fps ?? DEFAULT_VIDEO_FPS}
+                compositionHeight={config?.height ?? DEFAULT_VIDEO_HEIGHT}
+                compositionWidth={config?.width ?? DEFAULT_VIDEO_WIDTH}
+                renderPoster={renderPoster}
+                showPosterWhenUnplayed
+                controls={false}
+                loop
+                acknowledgeRemotionLicense
+                inputProps={inputProps}
+                className="flex-1 select-none"
+                clickToPlay={true}
+              />
+
+              <PlayerControl
+                playerRef={playerRef}
+                durationInFrames={config.durationInFrames}
+                fps={config.fps}
+              />
+            </div>
           )}
         </div>
       </div>

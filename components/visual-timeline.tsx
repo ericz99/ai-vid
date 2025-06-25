@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Layers, TypeOutline, Video } from "lucide-react";
+import LoadingSpinner from "./spinner";
 
 const TextChunk = ({
   chunk,
@@ -34,8 +35,10 @@ const TextChunk = ({
   selectedFrame,
   highlightKeys,
   hoveredHighlightKey,
-  setHoveredHighlightKey,
   setHoverDropdownPos,
+  setHoveredHighlightKey,
+  setSelectedHightlightFrame,
+  setSelectedEditSequence,
   id,
 }: {
   chunk: WordToken[];
@@ -49,6 +52,7 @@ const TextChunk = ({
   setSelectedHightlightFrame: (key: string | null) => void;
   setHoveredHighlightKey: (key: string | null) => void;
   setHoverDropdownPos: (pos: { left: number; top: number } | null) => void;
+  setSelectedEditSequence: (key: string | null) => void;
   id: string;
 }) => {
   useEffect(() => {
@@ -64,6 +68,7 @@ const TextChunk = ({
         flexDirection: "row",
         gap: "4px",
         userSelect: "text",
+        marginRight: 4,
       }}
     >
       {chunk.map(({ word, fromMs: fromMsWord, toMs: toMsWord }, wordIndex) => {
@@ -112,7 +117,7 @@ const TextChunk = ({
           isHighlighted && hoveredHighlightKey === highlightKeyForWord;
 
         return (
-          <span
+          <div
             key={wordIndex}
             data-seq-id={id}
             data-from-ms={fromMs + fromMsWord}
@@ -126,17 +131,18 @@ const TextChunk = ({
                 : undefined,
             }}
             className={cn(
-              "text-black text-left text-sm transition-all ease-in-out duration-75 select-text",
+              "inline-block text-black text-left text-sm transition-all ease-in-out duration-75 select-text",
               (isHighlighted || isHovered) &&
                 "bg-[#90e0ef] text-white select-none"
             )}
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+              // e.preventDefault();
+              // e.stopPropagation();
 
               if (isHighlighted) {
                 setHoveredHighlightKey(highlightKeyForWord);
-                // setSelectedHightlightFrame(highlightKeyForWord);
+                setSelectedHightlightFrame(null);
+                setSelectedEditSequence(null);
 
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
 
@@ -151,7 +157,7 @@ const TextChunk = ({
             }}
           >
             {word}
-          </span>
+          </div>
         );
       })}
     </div>
@@ -169,6 +175,12 @@ export function VisualTimeline({
   const playerRef = useTimelineStore((s) => s.playerRef);
   const addHighlightSequence = useTimelineStore((s) => s.addHighlightSequence);
   const fps = useTimelineStore((s) => s.config?.fps ?? 30);
+
+  const hoveredHighlightKey = useTimelineStore((s) => s.hoveredHighlightKey);
+  const setHoveredHighlightKey = useTimelineStore(
+    (s) => s.setHoveredHighlightKey
+  );
+
   const selectedHighlightFrame = useTimelineStore(
     (s) => s.selectedHighlightFrame
   );
@@ -176,10 +188,11 @@ export function VisualTimeline({
     (s) => s.setSelectedHightlightFrame
   );
 
-  const [currentMs, setCurrentMs] = useState(0);
-  const [hoveredHighlightKey, setHoveredHighlightKey] = useState<string | null>(
-    null
+  const setSelectedEditSequence = useTimelineStore(
+    (s) => s.setSelectedEditSequence
   );
+
+  const [currentMs, setCurrentMs] = useState(0);
 
   const [dropdownPos, setDropdownPos] = useState<{
     left: number;
@@ -227,15 +240,11 @@ export function VisualTimeline({
   const handleSelection = useCallback(() => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) {
-      setSelectedHightlightFrame(null);
-      setDropdownPos(null);
-      setSelectedSeq([]);
-
       return;
     }
 
     const range = selection.getRangeAt(0);
-    const spans = Array.from(document.querySelectorAll("span[data-from-ms]"));
+    const spans = Array.from(document.querySelectorAll("div[data-from-ms]"));
     const rect = range.getBoundingClientRect();
     // Adjust for scroll position
     setDropdownPos({
@@ -292,9 +301,19 @@ export function VisualTimeline({
   console.log("selectedSeq", selectedSeq);
   console.log("sortedSequences", sortedSequences);
   console.log("selectedHighlightFrame", selectedHighlightFrame);
+  console.log("hoveredHighlightKey", hoveredHighlightKey);
+
+  if (sortedSequences.length === 0) {
+    return (
+      <div className="h-full w-full p-2 space-y-2 flex flex-col justify-center items-center">
+        <LoadingSpinner size="xl" />
+        <span>Loading visual timeline</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full w-full p-2 space-y-2 flex flex-col items-start visual-timeline">
+    <div className="h-full w-full p-2 space-y-2 flex flex-wrap visual-timeline overflow-y-scroll">
       {sortedSequences.map((seq) => {
         const words = seq.text.split(" ").filter((word) => word.length > 0);
         const wordChucks = chunkArrayWithTiming(
@@ -330,6 +349,7 @@ export function VisualTimeline({
                   setHoveredHighlightKey={setHoveredHighlightKey}
                   setHoverDropdownPos={setDropdownPos}
                   setSelectedHightlightFrame={setSelectedHightlightFrame}
+                  setSelectedEditSequence={setSelectedEditSequence}
                   onWordClick={(wordStartMs) => {
                     const frame = Math.floor((wordStartMs / 1000) * fps);
                     jumpToFrame(frame);
@@ -340,7 +360,6 @@ export function VisualTimeline({
           </div>
         );
       })}
-
       {dropdownPos && selectedHighlightFrame && (
         <div
           style={{
@@ -356,6 +375,7 @@ export function VisualTimeline({
             onOpenChange={(open) => {
               if (!open) {
                 setSelectedHightlightFrame(null);
+                setHoveredHighlightKey(null);
                 setDropdownPos(null);
                 setSelectedSeq([]);
               }
@@ -374,9 +394,7 @@ export function VisualTimeline({
             <DropdownMenuContent>
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedHightlightFrame(
-                    `overlay-${selectedHighlightFrame}`
-                  );
+                  setSelectedEditSequence(`overlay-${selectedHighlightFrame}`);
                   setSelected("overlay");
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
@@ -400,8 +418,7 @@ export function VisualTimeline({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedHightlightFrame(`broll-${selectedHighlightFrame}`);
-
+                  setSelectedEditSequence(`broll-${selectedHighlightFrame}`);
                   setSelected("broll");
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
@@ -426,8 +443,7 @@ export function VisualTimeline({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedHightlightFrame(`text-${selectedHighlightFrame}`);
-
+                  setSelectedEditSequence(`text-${selectedHighlightFrame}`);
                   setSelected("text");
                   addHighlightSequence(
                     selectedSeq.map((s) => s.id),
@@ -454,7 +470,6 @@ export function VisualTimeline({
           </DropdownMenu>
         </div>
       )}
-
       {hoveredHighlightKey && dropdownPos && (
         <div
           style={{
@@ -486,15 +501,15 @@ export function VisualTimeline({
                 }}
               />
             </DropdownMenuTrigger>
-
             <DropdownMenuContent>
               {data && data[0] === "text" && (
                 <DropdownMenuItem
                   onClick={() => {
                     setSelected("text");
-                    setSelectedHightlightFrame(hoveredHighlightKey);
+                    setSelectedEditSequence(hoveredHighlightKey);
                   }}
                 >
+                  <TypeOutline size={18} />
                   Edit Text
                 </DropdownMenuItem>
               )}
@@ -503,9 +518,10 @@ export function VisualTimeline({
                 <DropdownMenuItem
                   onClick={() => {
                     setSelected("overlay");
-                    setSelectedHightlightFrame(hoveredHighlightKey);
+                    setSelectedEditSequence(hoveredHighlightKey);
                   }}
                 >
+                  <Layers size={18} />
                   Edit Overlay
                 </DropdownMenuItem>
               )}
@@ -514,9 +530,10 @@ export function VisualTimeline({
                 <DropdownMenuItem
                   onClick={() => {
                     setSelected("broll");
-                    setSelectedHightlightFrame(hoveredHighlightKey);
+                    setSelectedEditSequence(hoveredHighlightKey);
                   }}
                 >
+                  <Video size={18} />
                   Edit B-Roll
                 </DropdownMenuItem>
               )}
