@@ -197,8 +197,8 @@ export function PageClient({
               <TabsTrigger value="audio">Audio</TabsTrigger>
             </TabsList>
 
-            <div className="max-h-[600px] overflow-y-auto">
-              <TabsContent value="visuals">
+            <div className="h-full max-h-[600px] overflow-y-auto">
+              <TabsContent value="visuals" className="h-full">
                 <VisualTimeline
                   setSelected={(type: HighlightType) => setSelected(type)}
                 />
