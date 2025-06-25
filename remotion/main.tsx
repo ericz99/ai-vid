@@ -15,11 +15,13 @@ import {
   TextSequence as ITextSequence,
   useTimelineStore,
   ImageSequence as IImageSequence,
+  HighlightTextSequence as IHighlightTextSequence,
 } from "./store";
 import { TRACKS } from "./constants";
 import { ImageSequence } from "./components/image-sequence";
 import { SubtitleSequence } from "./components/subtitle-sequence";
 import { TextSequence } from "./components/text-sequence";
+import { HighlightTextSequence } from "./components/highlight-text-sequence";
 
 loadFont("normal", {
   subsets: ["latin"],
@@ -51,6 +53,7 @@ export const Main = ({
 }) => {
   const {
     sequences,
+    highlightSequences,
     bulkAddSequence,
     captions,
     setCaptions,
@@ -124,6 +127,12 @@ export const Main = ({
       .sort((a, b) => a.fromMs - b.fromMs) as IImageSequence[];
   }, [sequences]);
 
+  const customTextSequences = useMemo(() => {
+    return Object.values(highlightSequences)
+      .filter((seq) => seq.track === TRACKS.TEXT)
+      .sort((a, b) => a.fromMs - b.fromMs) as IHighlightTextSequence[];
+  }, [highlightSequences]);
+
   return (
     <AbsoluteFill style={{ backgroundColor: "white" }}>
       <AbsoluteFill>
@@ -149,6 +158,11 @@ export const Main = ({
       {/* IMAGE SEQUENCE */}
       {imageSequence.map((seq) => (
         <ImageSequence key={seq.id} sequence={seq} />
+      ))}
+
+      {/* CUSTOM TEXT SEQUENCE */}
+      {customTextSequences.map((seq) => (
+        <HighlightTextSequence key={seq.id} sequence={seq} />
       ))}
     </AbsoluteFill>
   );

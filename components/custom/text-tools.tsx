@@ -127,12 +127,15 @@ export function HighlightTextTools({
               type="color"
               value={sequence.config?.color ?? "#ffffff"}
               onChange={(e) => {
-                updateHighlightSequence(sequence.id, {
-                  config: {
-                    ...sequence.config,
-                    color: e.target.value,
-                  },
-                });
+                const newColor = e.target.value;
+                if (newColor !== (sequence.config?.color ?? "#ffffff")) {
+                  updateHighlightSequence(sequence.id, {
+                    config: {
+                      ...sequence.config,
+                      color: newColor,
+                    },
+                  });
+                }
               }}
               className="sr-only"
             />
@@ -167,7 +170,10 @@ export function HighlightTextTools({
                 updateHighlightSequence(sequence.id, {
                   config: {
                     ...sequence.config,
-                    top: Number(e.target.value),
+                    pos: {
+                      ...sequence.config?.pos,
+                      top: Number(e.target.value),
+                    },
                   },
                 });
               }}
@@ -194,7 +200,10 @@ export function HighlightTextTools({
                 updateHighlightSequence(sequence.id, {
                   config: {
                     ...sequence.config,
-                    left: Number(e.target.value),
+                    pos: {
+                      ...sequence.config?.pos,
+                      left: Number(e.target.value),
+                    },
                   },
                 });
               }}

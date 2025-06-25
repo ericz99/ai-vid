@@ -35,6 +35,9 @@ const TextChunk = ({
   highlightKeys,
   hoveredHighlightKey,
   setHoveredHighlightKey,
+  setHoverDropdownPos,
+  setSelectedHightlightFrame,
+  id,
 }: {
   chunk: WordToken[];
   fromMs: number;
@@ -44,7 +47,10 @@ const TextChunk = ({
   selectedFrame: string | null;
   highlightKeys: string[];
   hoveredHighlightKey: string | null;
+  setSelectedHightlightFrame: (key: string | null) => void;
   setHoveredHighlightKey: (key: string | null) => void;
+  setHoverDropdownPos: (pos: { left: number; top: number } | null) => void;
+  id: string;
 }) => {
   useEffect(() => {
     document.addEventListener("mouseup", handleSelection);
@@ -59,6 +65,7 @@ const TextChunk = ({
         flexDirection: "row",
         gap: "4px",
         fontSize: 24,
+        userSelect: "text",
       }}
     >
       {chunk.map(({ word, fromMs: fromMsWord, toMs: toMsWord }, wordIndex) => {
@@ -109,11 +116,12 @@ const TextChunk = ({
         return (
           <span
             key={wordIndex}
+            data-seq-id={id}
             data-from-ms={fromMs + fromMsWord}
             data-to-ms={fromMs + toMsWord}
             style={{
               color: isActive ? "#f4a261" : "#000000",
-              userSelect: "all",
+              userSelect: "text",
               backgroundColor: isHovered
                 ? "#2779bd" // darker blue on hover
                 : isHighlighted
@@ -121,12 +129,24 @@ const TextChunk = ({
                 : undefined,
             }}
             className={cn(
-              "text-black text-left cursor-pointer text-base transition-all ease-in-out duration-75",
+              "text-black text-left text-base transition-all ease-in-out duration-75",
               (isHighlighted || isHovered) && "bg-[#90e0ef] text-white"
             )}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
               if (isHighlighted) {
                 setHoveredHighlightKey(highlightKeyForWord);
+                setSelectedHightlightFrame(highlightKeyForWord);
+
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+
+                setHoverDropdownPos({
+                  left: rect.left + window.scrollX,
+                  top: rect.bottom + window.scrollY,
+                });
+                onWordClick?.(fromMs + toMsWord);
               } else {
                 onWordClick?.(fromMs + toMsWord);
               }
@@ -163,6 +183,12 @@ export function VisualTimeline({
     null
   );
 
+  const [dropdownPos, setDropdownPos] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
+
+  const [selectedSeq, setSelectedSeq] = useState<ITextSequence | null>(null);
   const sequenceRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -204,11 +230,20 @@ export function VisualTimeline({
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) {
       setSelectedHightlightFrame(null);
+      setDropdownPos(null);
+      setSelectedSeq(null);
+
       return;
     }
 
     const range = selection.getRangeAt(0);
     const spans = Array.from(document.querySelectorAll("span[data-from-ms]"));
+    const rect = range.getBoundingClientRect();
+    // Adjust for scroll position
+    setDropdownPos({
+      left: rect.left + window.scrollX,
+      top: rect.bottom + window.scrollY, // below the selection
+    });
 
     const selectedSpans = spans.filter((span) => {
       const node = span as HTMLElement;
@@ -227,8 +262,19 @@ export function VisualTimeline({
       );
       console.log("Selected fromMs:", fromMs, "toMs:", toMs);
       setSelectedHightlightFrame(`${fromMs}:${toMs}`);
+      const seqId = selectedSpans[0]
+        .closest("[data-seq-id]")
+        ?.getAttribute("data-seq-id");
+      const foundSeq = sortedSequences.find((s) => String(s.id) === seqId);
+      setSelectedSeq(foundSeq ?? null);
+    } else {
+      setSelectedSeq(null);
     }
-  }, [setSelectedHightlightFrame]);
+  }, [setSelectedHightlightFrame, sortedSequences]);
+
+  const data = hoveredHighlightKey ? hoveredHighlightKey.split("-") : null;
+
+  console.log("hoveredHighlightKey", hoveredHighlightKey);
 
   return (
     <div className="h-full w-full p-2 space-y-2 flex flex-col gap-2 items-start visual-timeline">
@@ -244,194 +290,220 @@ export function VisualTimeline({
           return null;
         }
 
-        let selectedFromMs = null,
-          selectedToMs = null;
-        if (selectedHighlightFrame) {
-          [selectedFromMs, selectedToMs] = selectedHighlightFrame
-            .split(":")
-            .map(Number);
-        }
-
-        const highlightSelected =
-          selectedFromMs !== null &&
-          selectedToMs !== null &&
-          selectedFromMs >= seq.fromMs &&
-          selectedToMs <= seq.toMs;
-
-        const hoveredHighlightInSeq =
-          hoveredHighlightKey !== null &&
-          Array.isArray(seq.highlightKeys) &&
-          seq.highlightKeys.some((key) => key.includes(hoveredHighlightKey));
-
-        const openDropdown = highlightSelected || hoveredHighlightInSeq;
-
-        const data: [string, string] | null =
-          hoveredHighlightKey !== null
-            ? (hoveredHighlightKey.split("-") as [string, string])
-            : null;
-
         return (
-          <DropdownMenu
+          <div
             key={seq.id}
+            // ref={(el) => {
+            //   sequenceRefs.current[seq.id] = el;
+            // }}
+            className="flex flex-col gap-2"
+          >
+            <div className="text-sm">
+              {"["}
+              {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s{"]"}
+            </div>
+
+            {wordChucks.map((chunk, index) => {
+              return (
+                <TextChunk
+                  id={seq.id}
+                  key={index}
+                  chunk={chunk}
+                  fromMs={seq.fromMs}
+                  currentTimeMs={currentMs}
+                  handleSelection={handleSelection}
+                  highlightKeys={seq.highlightKeys ?? []}
+                  selectedFrame={selectedHighlightFrame}
+                  hoveredHighlightKey={hoveredHighlightKey}
+                  setHoveredHighlightKey={setHoveredHighlightKey}
+                  setHoverDropdownPos={setDropdownPos}
+                  setSelectedHightlightFrame={setSelectedHightlightFrame}
+                  onWordClick={(wordStartMs) => {
+                    const frame = Math.floor((wordStartMs / 1000) * fps);
+                    jumpToFrame(frame);
+                  }}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+
+      {dropdownPos && selectedHighlightFrame && selectedSeq && (
+        <div
+          style={{
+            position: "absolute",
+            left: dropdownPos.left,
+            top: dropdownPos.top - 10,
+            zIndex: 1000,
+          }}
+        >
+          <DropdownMenu
             defaultOpen={false}
-            open={openDropdown}
+            open={true}
             onOpenChange={(open) => {
               if (!open) {
-                setHoveredHighlightKey(null);
+                setSelectedHightlightFrame(null);
+                setDropdownPos(null);
+                setSelectedSeq(null);
               }
             }}
           >
             <DropdownMenuTrigger asChild>
-              <div
-                ref={(el) => {
-                  sequenceRefs.current[seq.id] = el;
+              <button
+                style={{
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                  pointerEvents: "none",
                 }}
-                className="flex flex-col gap-2"
-              >
-                <div className="text-sm">
-                  {"["}
-                  {msToSeconds(seq.fromMs)}s → To: {msToSeconds(seq.toMs)}s{"]"}
-                </div>
-
-                {wordChucks.map((chunk, index) => {
-                  return (
-                    <TextChunk
-                      key={index}
-                      chunk={chunk}
-                      fromMs={seq.fromMs}
-                      currentTimeMs={currentMs}
-                      handleSelection={handleSelection}
-                      highlightKeys={seq.highlightKeys ?? []}
-                      selectedFrame={selectedHighlightFrame}
-                      hoveredHighlightKey={hoveredHighlightKey}
-                      setHoveredHighlightKey={setHoveredHighlightKey}
-                      onWordClick={(wordStartMs) => {
-                        const frame = Math.floor((wordStartMs / 1000) * fps);
-                        jumpToFrame(frame);
-                      }}
-                    />
-                  );
-                })}
-              </div>
+              />
             </DropdownMenuTrigger>
-            {highlightSelected && (
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedHightlightFrame(
-                      `overlay-${selectedHighlightFrame}`
-                    );
-                    setSelected("overlay");
-                    addHighlightSequence(seq.id, {
-                      type: "overlay",
-                      fromMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[0])
-                        : 0,
-                      toMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[1])
-                        : 0,
-                      id: `overlay-${selectedHighlightFrame}`,
-                      overlaySrc: "",
-                      track: TRACKS.OVERLAY,
-                    });
-                  }}
-                >
-                  <Layers size={18} />
-                  Add Overlay
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedHightlightFrame(
-                      `broll-${selectedHighlightFrame}`
-                    );
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedHightlightFrame(
+                    `overlay-${selectedHighlightFrame}`
+                  );
+                  setSelected("overlay");
+                  addHighlightSequence(selectedSeq.id, {
+                    type: "overlay",
+                    fromMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[0])
+                      : 0,
+                    toMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[1])
+                      : 0,
+                    id: `overlay-${selectedHighlightFrame}`,
+                    overlaySrc: "",
+                    track: TRACKS.OVERLAY,
+                  });
+                }}
+              >
+                <Layers size={18} />
+                Add Overlay
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedHightlightFrame(`broll-${selectedHighlightFrame}`);
 
-                    setSelected("b-roll");
-                    addHighlightSequence(seq.id, {
-                      type: "b-roll",
-                      fromMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[0])
-                        : 0,
-                      toMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[1])
-                        : 0,
-                      id: `broll-${selectedHighlightFrame}`,
-                      videoSrc: "",
-                      muteAudio: false,
-                      track: TRACKS.BROLL,
-                    });
-                  }}
-                >
-                  <Video size={18} />
-                  Add B-Roll
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedHightlightFrame(
-                      `text-${selectedHighlightFrame}`
-                    );
+                  setSelected("broll");
+                  addHighlightSequence(selectedSeq.id, {
+                    type: "broll",
+                    fromMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[0])
+                      : 0,
+                    toMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[1])
+                      : 0,
+                    id: `broll-${selectedHighlightFrame}`,
+                    videoSrc: "",
+                    muteAudio: false,
+                    track: TRACKS.BROLL,
+                  });
+                }}
+              >
+                <Video size={18} />
+                Add B-Roll
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedHightlightFrame(`text-${selectedHighlightFrame}`);
 
-                    setSelected("text");
-                    addHighlightSequence(seq.id, {
-                      type: "text",
-                      fromMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[0])
-                        : 0,
-                      toMs: selectedHighlightFrame
-                        ? Number(selectedHighlightFrame.split(":")[1])
-                        : 0,
-                      id: `text-${selectedHighlightFrame}`,
-                      text: "",
-                      config: {},
-                      track: TRACKS.TEXT,
-                    });
-                  }}
-                >
-                  <TypeOutline size={18} />
-                  Add Text
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            )}
-
-            {hoveredHighlightInSeq && (
-              <DropdownMenuContent>
-                {data && data[0] === "text" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelected("text");
-                      setSelectedHightlightFrame(hoveredHighlightKey);
-                    }}
-                  >
-                    Edit Text
-                  </DropdownMenuItem>
-                )}
-
-                {data && data[0] === "overlay" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelected("overlay");
-
-                      setSelectedHightlightFrame(hoveredHighlightKey);
-                    }}
-                  >
-                    Edit Overlay
-                  </DropdownMenuItem>
-                )}
-
-                {data && data[0] === "broll" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelected("b-roll");
-                      setSelectedHightlightFrame(hoveredHighlightKey);
-                    }}
-                  >
-                    Edit B-Roll
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            )}
+                  setSelected("text");
+                  addHighlightSequence(selectedSeq.id, {
+                    type: "text",
+                    fromMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[0])
+                      : 0,
+                    toMs: selectedHighlightFrame
+                      ? Number(selectedHighlightFrame.split(":")[1])
+                      : 0,
+                    id: `text-${selectedHighlightFrame}`,
+                    text: "",
+                    config: {},
+                    track: TRACKS.TEXT,
+                  });
+                }}
+              >
+                <TypeOutline size={18} />
+                Add Text
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
-        );
-      })}
+        </div>
+      )}
+
+      {hoveredHighlightKey && dropdownPos && (
+        <div
+          style={{
+            position: "absolute",
+            left: dropdownPos.left,
+            top: dropdownPos.top - 10,
+            zIndex: 1000,
+          }}
+        >
+          <DropdownMenu
+            defaultOpen={false}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedHightlightFrame(null);
+                setHoveredHighlightKey(null);
+                setDropdownPos(null);
+                setSelectedSeq(null);
+              }
+            }}
+          >
+            <DropdownMenuTrigger asChild>
+              <button
+                style={{
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                  pointerEvents: "none",
+                }}
+              />
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent>
+              {data && data[0] === "text" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelected("text");
+                    setSelectedHightlightFrame(hoveredHighlightKey);
+                  }}
+                >
+                  Edit Text
+                </DropdownMenuItem>
+              )}
+
+              {data && data[0] === "overlay" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelected("overlay");
+
+                    setSelectedHightlightFrame(hoveredHighlightKey);
+                  }}
+                >
+                  Edit Overlay
+                </DropdownMenuItem>
+              )}
+
+              {data && data[0] === "broll" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelected("broll");
+                    setSelectedHightlightFrame(hoveredHighlightKey);
+                  }}
+                >
+                  Edit B-Roll
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 }

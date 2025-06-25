@@ -158,6 +158,8 @@ export function PageClient({
       console.log("selectedHighlightFrame", selectedHighlightFrame);
       const [type, range] = selectedHighlightFrame.split("-");
 
+      setSelected(type as HighlightType);
+
       if (type === "text") {
         return highlightSequences[`text-${range}`] as HighlightTextSequence;
       } else if (type === "overlay") {
@@ -170,7 +172,7 @@ export function PageClient({
     }
   }, [selectedHighlightFrame, highlightSequences]);
 
-  console.log("highlightSequence", highlightSequence);
+  console.log("selectedType", selectedType);
 
   return (
     <div className="md:max-w-full lg:max-w-8xl lg:container lg:mx-auto flex gap-4 h-screen overflow-hidden p-4">
@@ -228,7 +230,7 @@ export function PageClient({
         </div>
       )}
 
-      {selectedType && selectedType === "b-roll" && (
+      {selectedType && selectedType === "broll" && (
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
           B-roll
         </div>

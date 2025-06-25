@@ -45,7 +45,7 @@ export interface HighlightOverlaySequence extends HighlightSequenceBase {
 }
 
 export interface HighlightBRollSequence extends HighlightSequenceBase {
-  type: "b-roll";
+  type: "broll";
   videoSrc: string;
   muteAudio?: boolean;
 }
@@ -445,7 +445,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
           ...(existing as HighlightOverlaySequence),
           ...(updates as Partial<HighlightOverlaySequence>),
         };
-      } else if (existing.type === "b-roll") {
+      } else if (existing.type === "broll") {
         updatedSequence = {
           ...(existing as HighlightBRollSequence),
           ...(updates as Partial<HighlightBRollSequence>),
