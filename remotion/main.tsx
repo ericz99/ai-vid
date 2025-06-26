@@ -2,11 +2,7 @@
 
 import { AbsoluteFill, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
-import {
-  Caption,
-  createTikTokStyleCaptions,
-  parseSrt,
-} from "@remotion/captions";
+import { Caption, createTikTokStyleCaptions } from "@remotion/captions";
 import { LoopableOffthreadVideo } from "./loop-thread-video";
 import { useEffect, useMemo } from "react";
 import { SWITCH_CAPTIONS_EVERY_MS } from "@/lib/preset";
@@ -19,9 +15,10 @@ import {
 } from "./store";
 import { TRACKS } from "./constants";
 import { ImageSequence } from "./components/image-sequence";
-import { SubtitleSequence } from "./components/subtitle-sequence";
 import { TextSequence } from "./components/text-sequence";
 import { HighlightTextSequence } from "./components/highlight-text-sequence";
+import { convertTokensToCaptions, WordBase } from "./utils";
+import { SubtitleSequence } from "./components/subtitle-sequence";
 
 loadFont("normal", {
   subsets: ["latin"],
@@ -48,7 +45,7 @@ export const Main = ({
   subtitles,
   videoSrc,
 }: {
-  subtitles: { transcript: string; srt: string } | null;
+  subtitles: { transcript: string; srt: string; tokens: WordBase[] } | null;
   videoSrc: string;
 }) => {
   const {
@@ -66,8 +63,12 @@ export const Main = ({
 
   useEffect(() => {
     if (!captions.length) {
-      const { captions: parseCaptions } = parseSrt({ input: subtitles!.srt });
-      const formattedCaptions = formatCaptionsForRemotion(parseCaptions);
+      // const { captions: parseCaptions } = parseSrt({ input: subtitles!.srt });
+      // const formattedCaptions = formatCaptionsForRemotion(parseCaptions);
+      // setCaptions(formattedCaptions);
+
+      const tokenCaptions = convertTokensToCaptions(subtitles!.tokens);
+      const formattedCaptions = formatCaptionsForRemotion(tokenCaptions);
       setCaptions(formattedCaptions);
     }
   }, [subtitles, captions, setCaptions]);
@@ -79,13 +80,15 @@ export const Main = ({
     });
   }, [captions]);
 
+  console.log("pages", pages);
+
   // # load default sequence for the captions
   useEffect(() => {
     if (!loadCaption && pages.length > 0) {
       console.log("LOADING SEQUENCES");
       const allCaptionSequence = pages
         .map((page, index) => {
-          const originalToMs = page.tokens[0].toMs;
+          const originalToMs = page.tokens[page.tokens.length - 1].toMs;
           const durationMs = originalToMs - page.startMs;
 
           return {
@@ -97,6 +100,7 @@ export const Main = ({
             track: TRACKS.SUBTITLES,
             text: page.text,
             config: {},
+            tokens: page.tokens,
           };
         })
         .filter((c) => c) as SequenceObject[];

@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Layers, TypeOutline, Video } from "lucide-react";
+import { Layers, TypeOutline, Video, AudioLines } from "lucide-react";
 import LoadingSpinner from "./spinner";
 
 const TextChunk = ({
@@ -417,7 +417,7 @@ export function VisualTimeline({
                 }}
               >
                 <Layers size={18} />
-                Add Overlay
+                Add Media Overlay
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
@@ -446,7 +446,7 @@ export function VisualTimeline({
                 <Video size={18} />
                 Add B-Roll
               </DropdownMenuItem>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 onClick={() => {
                   setSelectedEditSequence(`text-${selectedHighlightFrame}`);
                   setSelected("text");
@@ -472,6 +472,33 @@ export function VisualTimeline({
               >
                 <TypeOutline size={18} />
                 Add Text
+              </DropdownMenuItem> */}
+
+              <DropdownMenuItem
+                onClick={() => {
+                  // setSelectedEditSequence(`text-${selectedHighlightFrame}`);
+                  // setSelected("text");
+                  // setDialogOpen(true);
+                  // addHighlightSequence(
+                  //   selectedSeq.map((s) => s.id),
+                  //   {
+                  //     type: "text",
+                  //     fromMs: selectedHighlightFrame
+                  //       ? Number(selectedHighlightFrame.split(":")[0])
+                  //       : 0,
+                  //     toMs: selectedHighlightFrame
+                  //       ? Number(selectedHighlightFrame.split(":")[1])
+                  //       : 0,
+                  //     id: `text-${selectedHighlightFrame}`,
+                  //     text: "",
+                  //     config: {},
+                  //     track: TRACKS.SOUND_EFFECTS,
+                  //   }
+                  // );
+                }}
+              >
+                <AudioLines size={18} />
+                Add Sound Effects
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

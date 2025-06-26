@@ -1,7 +1,7 @@
 import { PlayerRef } from "@remotion/player";
 import { create } from "zustand";
 import { RefObject } from "react";
-import { Caption } from "@remotion/captions";
+import { Caption, TikTokToken } from "@remotion/captions";
 import { TRACKS } from "../constants";
 import React from "react";
 
@@ -58,6 +58,7 @@ export type HightlightSequence =
 export interface TextSequence extends BaseSequence {
   type: "text";
   text: string;
+  tokens: TikTokToken[];
 
   config: TextConfig;
   preset?: string | null;
@@ -263,6 +264,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
         color: "#f07167",
         fontSize: 24,
       },
+      tokens: [],
     },
     image__1: {
       fromMs: 2000,

@@ -29,7 +29,6 @@ import {
   useTimelineStore,
 } from "@/remotion/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Subtitles } from "@/components/subtitles";
 import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
 import { MediaTools } from "@/components/tools/media-tools";
@@ -45,6 +44,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { CaptionsTimeline } from "@/components/captions-timeline";
+import { StylesEditor } from "@/components/styles-editor";
+import { WordBase } from "@/remotion/utils";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -75,7 +77,7 @@ export function PageClient({
   subtitles = null,
 }: {
   videoSrc: string;
-  subtitles: { transcript: string; srt: string } | null;
+  subtitles: { transcript: string; srt: string; tokens: WordBase[] } | null;
 }) {
   const {
     config,
@@ -195,7 +197,7 @@ export function PageClient({
 
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
-      <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-[800px] flex gap-4 overflow-hidden p-4">
+      <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-[1000px] flex gap-4 overflow-hidden p-4">
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
           <Tabs
             defaultValue="visuals"
@@ -205,25 +207,31 @@ export function PageClient({
             <TabsList className="w-full">
               <TabsTrigger value="visuals">Visuals</TabsTrigger>
               <TabsTrigger value="styles">Styles</TabsTrigger>
-              <TabsTrigger value="subtitles">Subtitles</TabsTrigger>
+              <TabsTrigger value="captions">Captions</TabsTrigger>
               <TabsTrigger value="audio">Audio</TabsTrigger>
             </TabsList>
 
-            <div className="h-full max-h-[600px] overflow-y-auto">
-              <TabsContent value="visuals" className="h-full">
+            <TabsContent value="visuals" className="h-full">
+              <div className="h-full max-h-[500px] overflow-y-auto">
                 <VisualTimeline
                   setSelected={(type: HighlightType) => setSelected(type)}
                   setDialogOpen={(open) => setDialogOpen(open)}
                 />
-              </TabsContent>
+              </div>
+            </TabsContent>
 
-              <TabsContent value="styles">Styles</TabsContent>
+            <TabsContent value="styles">
+              <div className="h-full max-h-[900px] overflow-y-auto">
+                <StylesEditor />
+              </div>
+            </TabsContent>
 
-              <TabsContent value="subtitles">
-                <Subtitles />
-              </TabsContent>
-              <TabsContent value="audio">audio</TabsContent>
-            </div>
+            <TabsContent value="captions">
+              <div className="h-full max-h-[900px] overflow-y-auto">
+                <CaptionsTimeline />
+              </div>
+            </TabsContent>
+            <TabsContent value="audio">audio</TabsContent>
           </Tabs>
         </div>
 

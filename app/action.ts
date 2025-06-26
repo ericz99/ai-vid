@@ -1,5 +1,6 @@
 "use server";
 
+import { WordBase } from "@/remotion/utils";
 import { createClient, srt } from "@deepgram/sdk";
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
@@ -14,6 +15,9 @@ export const transcribeAudio = async (url: string) => {
       language: "en",
       smart_format: true,
       utterances: true,
+      filler_words: true,
+      dictation: true,
+      punctuate: true,
     }
   );
 
@@ -23,11 +27,11 @@ export const transcribeAudio = async (url: string) => {
 
   const transcript = result.results.channels[0].alternatives[0].transcript;
   const srtValue = srt(result);
-
-  // # convert into caption one word each
+  const tokens = result.results.channels[0].alternatives[0].words as WordBase[];
 
   return {
     transcript,
     srt: srtValue,
+    tokens,
   };
 };

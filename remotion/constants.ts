@@ -7,4 +7,5 @@ export const TRACKS = {
   AUDIO: 5,
   OVERLAY: 6,
   BROLL: 7,
+  SOUND_EFFECTS: 8,
 };
