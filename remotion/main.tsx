@@ -80,8 +80,6 @@ export const Main = ({
     });
   }, [captions]);
 
-  console.log("pages", pages);
-
   // # load default sequence for the captions
   useEffect(() => {
     if (!loadCaption && pages.length > 0) {
@@ -114,10 +112,14 @@ export const Main = ({
   }, [bulkAddSequence, fps, pages, loadCaption, setLoadCaption]);
 
   const subTitlesSequences = useMemo(() => {
-    return Object.values(sequences)
+    const captions = Object.values(sequences)
       .filter((seq) => seq.track === TRACKS.SUBTITLES)
       .sort((a, b) => a.fromMs - b.fromMs) as ITextSequence[];
+
+    return captions.filter((seq) => !seq.hidden);
   }, [sequences]);
+
+  console.log("subTitlesSequences", subTitlesSequences);
 
   const titleSequences = useMemo(() => {
     return Object.values(sequences)

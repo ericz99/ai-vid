@@ -20,10 +20,6 @@ import { AbsoluteFill } from "remotion";
 import LoadingSpinner from "@/components/spinner";
 import { parseMedia } from "@remotion/media-parser";
 import {
-  HighlightBRollSequence,
-  HighlightOverlaySequence,
-  HighlightTextSequence,
-  HighlightType,
   ImageSequence,
   TextSequence,
   useTimelineStore,
@@ -32,7 +28,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TRACKS } from "@/remotion/constants";
 import { TextTools } from "@/components/tools/text-tools";
 import { MediaTools } from "@/components/tools/media-tools";
-import { VisualTimeline } from "@/components/visual-timeline";
 import { PlayerControl } from "@/components/player/player-control";
 // import { HighlightTextTools } from "@/components/custom/text-tools";
 
@@ -44,9 +39,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CaptionsTimeline } from "@/components/captions-timeline";
+import { CaptionsEditor } from "@/components/captions-editor";
 import { StylesEditor } from "@/components/styles-editor";
 import { WordBase } from "@/remotion/utils";
+import { BrollEditor } from "@/components/broll-editor";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -86,12 +82,9 @@ export function PageClient({
     setCurrentFrame,
     selectedSequenceId,
     sequences,
-    highlightSequences,
-    selectedEditSequence,
   } = useTimelineStore();
   const playerRef = useRef<PlayerRef>(null);
   const [isPreloaded, setPreload] = useState(false);
-  const [selectedType, setSelected] = useState<HighlightType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -165,24 +158,24 @@ export function PageClient({
     }
   }, [sequences, selectedSequenceId]);
 
-  const highlightSequence = useMemo(() => {
-    if (selectedEditSequence) {
-      console.log("selectedEditSequence", selectedEditSequence);
-      const [type, range] = selectedEditSequence.split("-");
+  // const highlightSequence = useMemo(() => {
+  //   if (selectedEditSequence) {
+  //     console.log("selectedEditSequence", selectedEditSequence);
+  //     const [type, range] = selectedEditSequence.split("-");
 
-      // setSelected(type as HighlightType);
+  //     // setSelected(type as HighlightType);
 
-      if (type === "text") {
-        return highlightSequences[`text-${range}`] as HighlightTextSequence;
-      } else if (type === "overlay") {
-        return highlightSequences[
-          `overlay-${range}`
-        ] as HighlightOverlaySequence;
-      } else if (type === "broll") {
-        return highlightSequences[`broll-${range}`] as HighlightBRollSequence;
-      }
-    }
-  }, [selectedEditSequence, highlightSequences]);
+  //     if (type === "text") {
+  //       return highlightSequences[`text-${range}`] as HighlightTextSequence;
+  //     } else if (type === "overlay") {
+  //       return highlightSequences[
+  //         `overlay-${range}`
+  //       ] as HighlightOverlaySequence;
+  //     } else if (type === "broll") {
+  //       return highlightSequences[`broll-${range}`] as HighlightBRollSequence;
+  //     }
+  //   }
+  // }, [selectedEditSequence, highlightSequences]);
 
   // TODO: if hoverHighlightKey in mapper already or in highlightSequences then ignore do not open  drop down
   // TODO: cannot add duplicate highlight for example broll-24935:26935 text-24935:26935
@@ -191,32 +184,24 @@ export function PageClient({
   // ✅ TODO: if we were to click something it should jump to frame, but if we clicked on a highlighted (ALREADY HIGHLIGHTED) text, it should no open the default dropdown
   // TODO: cursor from beginning to end, i want to be able to reselect remove or add more  from a range
 
-  console.log("highlightSequence", highlightSequence);
-  console.log("seq type", selectedType);
-  console.log("dialog open", dialogOpen);
-
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
       <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-[1000px] flex gap-4 overflow-hidden p-4">
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
           <Tabs
-            defaultValue="visuals"
+            defaultValue="captions"
             style={{ height: "100%" }}
             orientation="horizontal"
           >
             <TabsList className="w-full">
-              <TabsTrigger value="visuals">Visuals</TabsTrigger>
-              <TabsTrigger value="styles">Styles</TabsTrigger>
               <TabsTrigger value="captions">Captions</TabsTrigger>
-              <TabsTrigger value="audio">Audio</TabsTrigger>
+              <TabsTrigger value="styles">Styles</TabsTrigger>
+              <TabsTrigger value="broll">B-Rolls</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="visuals" className="h-full">
-              <div className="h-full max-h-[500px] overflow-y-auto">
-                <VisualTimeline
-                  setSelected={(type: HighlightType) => setSelected(type)}
-                  setDialogOpen={(open) => setDialogOpen(open)}
-                />
+            <TabsContent value="styles">
+              <div className="h-full max-h-[900px] overflow-y-auto">
+                <BrollEditor />
               </div>
             </TabsContent>
 
@@ -228,10 +213,9 @@ export function PageClient({
 
             <TabsContent value="captions">
               <div className="h-full max-h-[900px] overflow-y-auto">
-                <CaptionsTimeline />
+                <CaptionsEditor />
               </div>
             </TabsContent>
-            <TabsContent value="audio">audio</TabsContent>
           </Tabs>
         </div>
 

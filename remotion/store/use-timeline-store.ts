@@ -59,6 +59,7 @@ export interface TextSequence extends BaseSequence {
   type: "text";
   text: string;
   tokens: TikTokToken[];
+  hidden?: boolean;
 
   config: TextConfig;
   preset?: string | null;
