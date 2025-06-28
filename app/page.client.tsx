@@ -186,11 +186,11 @@ export function PageClient({
 
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
-      <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-[1000px] flex gap-4 overflow-hidden p-4">
+      <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-full flex gap-4 overflow-hidden p-4">
         <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
           <Tabs
             defaultValue="captions"
-            style={{ height: "100%" }}
+            style={{ height: "100%", overflow: "hidden" }}
             orientation="horizontal"
           >
             <TabsList className="w-full">
@@ -199,22 +199,20 @@ export function PageClient({
               <TabsTrigger value="broll">B-Rolls</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="styles">
-              <div className="h-full max-h-[900px] overflow-y-auto">
+            <TabsContent value="broll" className="overflow-y-scroll">
+              <div className="h-full">
                 <BrollEditor />
               </div>
             </TabsContent>
 
-            <TabsContent value="styles">
-              <div className="h-full max-h-[900px] overflow-y-auto">
+            <TabsContent value="styles" className="overflow-y-scroll">
+              <div className="h-full">
                 <StylesEditor />
               </div>
             </TabsContent>
 
-            <TabsContent value="captions">
-              <div className="h-full max-h-[900px] overflow-y-auto">
-                <CaptionsEditor />
-              </div>
+            <TabsContent value="captions" className="overflow-y-scroll">
+              <CaptionsEditor />
             </TabsContent>
           </Tabs>
         </div>
