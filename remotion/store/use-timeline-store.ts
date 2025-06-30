@@ -5,6 +5,32 @@ import { Caption, TikTokToken } from "@remotion/captions";
 import { TRACKS } from "../constants";
 import React from "react";
 
+export interface CaptionStyle {
+  id: string;
+  name: string;
+  fontFamily: string;
+  fontWeight: string;
+  uppercase: boolean;
+  fontSize: number;
+  fontColor: string;
+  strokeWeight: "None" | "Small" | "Medium" | "Large";
+  strokeColor: string;
+  backgroundColor?: string;
+  shadow: "None" | "Small" | "Medium" | "Large";
+  displayWords: number;
+  positionY: number;
+  animation: boolean;
+  punctuation: boolean;
+  autoEmoji: "Auto" | "Top" | "None";
+  emojiAnimation: boolean;
+  gapFreeCaptions: boolean;
+  mainColor: string;
+  activeColor: string;
+  isNew?: boolean;
+  isTrending?: boolean;
+  className?: string;
+}
+
 type SequenceType = "text" | "video" | "audio-transition" | "image";
 
 interface BaseSequence {
@@ -62,7 +88,7 @@ export interface TextSequence extends BaseSequence {
   hidden?: boolean;
 
   config: TextConfig;
-  preset?: string | null;
+  preset?: string | null; // useless can remove later
 }
 
 interface AudioTransitionSequence extends BaseSequence {
@@ -180,6 +206,10 @@ interface TimelineStore {
     id: string,
     updates: Partial<HightlightSequence>
   ) => void;
+
+  // # global caption style presets
+  captionPresetId: string;
+  setCaptionPresetId: (id: string) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
@@ -188,6 +218,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   selectedHighlightFrame: null,
   hoveredHighlightKey: null,
   preset: null,
+  captionPresetId: "default",
 
   enableCaptions: true,
   setEnableCaptions: (checked: boolean) =>
@@ -491,6 +522,11 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   setSelectedEditSequence: (id) =>
     set(() => ({
       selectedEditSequence: id,
+    })),
+
+  setCaptionPresetId: (id) =>
+    set(() => ({
+      captionPresetId: id,
     })),
 
   setState: async (partialState) => {

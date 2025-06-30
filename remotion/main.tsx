@@ -10,12 +10,11 @@ import {
   SequenceObject,
   TextSequence as ITextSequence,
   useTimelineStore,
-  ImageSequence as IImageSequence,
   HighlightTextSequence as IHighlightTextSequence,
 } from "./store";
 import { TRACKS } from "./constants";
-import { ImageSequence } from "./components/image-sequence";
-import { TextSequence } from "./components/text-sequence";
+// import { ImageSequence } from "./components/image-sequence";
+// import { TextSequence } from "./components/text-sequence";
 import { HighlightTextSequence } from "./components/highlight-text-sequence";
 import { convertTokensToCaptions, WordBase } from "./utils";
 import { SubtitleSequence } from "./components/subtitle-sequence";
@@ -121,17 +120,17 @@ export const Main = ({
 
   console.log("subTitlesSequences", subTitlesSequences);
 
-  const titleSequences = useMemo(() => {
-    return Object.values(sequences)
-      .filter((seq) => seq.track === TRACKS.TEXT)
-      .sort((a, b) => a.fromMs - b.fromMs) as ITextSequence[];
-  }, [sequences]);
+  // const titleSequences = useMemo(() => {
+  //   return Object.values(sequences)
+  //     .filter((seq) => seq.track === TRACKS.TEXT)
+  //     .sort((a, b) => a.fromMs - b.fromMs) as ITextSequence[];
+  // }, [sequences]);
 
-  const imageSequence = useMemo(() => {
-    return Object.values(sequences)
-      .filter((seq) => seq.track === TRACKS.IMAGE)
-      .sort((a, b) => a.fromMs - b.fromMs) as IImageSequence[];
-  }, [sequences]);
+  // const imageSequence = useMemo(() => {
+  //   return Object.values(sequences)
+  //     .filter((seq) => seq.track === TRACKS.IMAGE)
+  //     .sort((a, b) => a.fromMs - b.fromMs) as IImageSequence[];
+  // }, [sequences]);
 
   const customTextSequences = useMemo(() => {
     return Object.values(highlightSequences)
@@ -157,14 +156,14 @@ export const Main = ({
         ))}
 
       {/* TEXT SEQUENCE */}
-      {titleSequences.map((seq) => (
+      {/* {titleSequences.map((seq) => (
         <TextSequence key={seq.id} sequence={seq} />
-      ))}
+      ))} */}
 
       {/* IMAGE SEQUENCE */}
-      {imageSequence.map((seq) => (
+      {/* {imageSequence.map((seq) => (
         <ImageSequence key={seq.id} sequence={seq} />
-      ))}
+      ))} */}
 
       {/* CUSTOM TEXT SEQUENCE */}
       {customTextSequences.map((seq) => (

@@ -1,0 +1,187 @@
+import { CaptionStyle } from "@/remotion/store";
+import {
+  Montserrat,
+  Inter,
+  Roboto,
+  Anton,
+  Chewy,
+  Poppins,
+} from "next/font/google";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+});
+
+const anton = Anton({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const chewy = Chewy({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+export const defaultStyle: CaptionStyle = {
+  id: "default",
+  name: "Default",
+  fontFamily: "Montserrat",
+  fontWeight: "bold",
+  uppercase: true,
+  fontSize: 58,
+  fontColor: "#FFD700",
+  strokeWeight: "Small",
+  strokeColor: "#000000",
+  shadow: "Small",
+  displayWords: 2,
+  positionY: 57,
+  animation: true,
+  punctuation: false,
+  autoEmoji: "Auto",
+  emojiAnimation: false,
+  gapFreeCaptions: false,
+  mainColor: "#FFFFFF",
+  activeColor: "#f4a261",
+  className: montserrat.className,
+};
+
+export const PRESET_STYLES: CaptionStyle[] = [
+  defaultStyle,
+  {
+    id: "sara",
+    name: "Sara",
+    fontFamily: "Inter",
+    fontWeight: "Bold",
+    uppercase: false,
+    fontSize: 48,
+    fontColor: "#FFFFFF",
+    strokeWeight: "None",
+    strokeColor: "#000000",
+    shadow: "Medium",
+    displayWords: 3,
+    positionY: 60,
+    animation: true,
+    punctuation: true,
+    autoEmoji: "Auto",
+    emojiAnimation: true,
+    gapFreeCaptions: true,
+    mainColor: "#FF6B6B",
+    activeColor: "#f4a261",
+    isNew: true,
+    isTrending: true,
+    className: inter.className,
+  },
+  {
+    id: "daniel",
+    name: "Daniel",
+    fontFamily: "Roboto",
+    fontWeight: "Black",
+    uppercase: true,
+    fontSize: 52,
+    fontColor: "#FF4444",
+    strokeWeight: "Medium",
+    strokeColor: "#FFFFFF",
+    shadow: "Large",
+    displayWords: 2,
+    positionY: 55,
+    animation: true,
+    punctuation: false,
+    autoEmoji: "Top",
+    emojiAnimation: true,
+    gapFreeCaptions: false,
+    mainColor: "#FF4444",
+    activeColor: "#f4a261",
+    isNew: true,
+    isTrending: true,
+    className: roboto.className,
+  },
+  {
+    id: "dan",
+    name: "DAN",
+    fontFamily: "Anton",
+    fontWeight: "Black",
+    uppercase: true,
+    fontSize: 64,
+    fontColor: "#000000",
+    strokeWeight: "Large",
+    strokeColor: "#FFFF00",
+    shadow: "None",
+    displayWords: 1,
+    positionY: 50,
+    animation: true,
+    punctuation: false,
+    autoEmoji: "None",
+    emojiAnimation: false,
+    gapFreeCaptions: true,
+    mainColor: "#FFFF00",
+    activeColor: "#f4a261",
+    isNew: true,
+    className: anton.className,
+  },
+  {
+    id: "hormozi",
+    name: "HORMOZI",
+    fontFamily: "Chewy",
+    fontWeight: "Black",
+    uppercase: true,
+    fontSize: 56,
+    fontColor: "#FFFF00",
+    strokeWeight: "Medium",
+    strokeColor: "#000000",
+    shadow: "Small",
+    displayWords: 2,
+    positionY: 65,
+    animation: true,
+    punctuation: true,
+    autoEmoji: "Auto",
+    emojiAnimation: true,
+    gapFreeCaptions: false,
+    mainColor: "#FFFF00",
+    activeColor: "#f4a261",
+    isNew: true,
+    isTrending: true,
+    className: chewy.className,
+  },
+  {
+    id: "Zeus",
+    name: "Zeus",
+    fontFamily: "Chewy",
+    fontWeight: "bold",
+    uppercase: true,
+    fontSize: 22,
+    fontColor: "#000000",
+    strokeWeight: "None",
+    strokeColor: "#000000",
+    shadow: "Small",
+    backgroundColor: "#E7E5E7",
+    displayWords: 2,
+    positionY: 65,
+    animation: true,
+    punctuation: true,
+    autoEmoji: "Auto",
+    emojiAnimation: true,
+    gapFreeCaptions: false,
+    mainColor: "#000000",
+    activeColor: "#f4a261",
+    isNew: true,
+    isTrending: true,
+    className: poppins.className,
+  },
+];
+
+export const getStylePreset = (id: string) => {
+  return PRESET_STYLES.find((p) => p.id === id);
+};

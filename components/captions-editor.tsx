@@ -186,7 +186,7 @@ export function CaptionsEditor() {
                             fontSize: 14,
                             userSelect: "text",
                           }}
-                          className="hover:border hover:border-blue-400 hover:p-0.5"
+                          className="p-0.5 hover:border-blue-400 inline-block border border-solid border-transparent transition-all ease-in-out duration-75"
                         >
                           {t.text}
                         </span>

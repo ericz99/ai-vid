@@ -43,6 +43,7 @@ import { CaptionsEditor } from "@/components/captions-editor";
 import { StylesEditor } from "@/components/styles-editor";
 import { WordBase } from "@/remotion/utils";
 import { BrollEditor } from "@/components/broll-editor";
+import { StylesRenderPreset } from "@/components/styles-render-preset";
 
 const calculateCaptionedVideoMetadata = async ({ src }: { src: string }) => {
   const { slowDurationInSeconds, dimensions } = await parseMedia({
@@ -187,17 +188,19 @@ export function PageClient({
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
       <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-full flex gap-4 overflow-hidden p-4">
-        <div className="flex-1 overflow-y-auto p-2 bg-white border border-solid rounded-md">
+        <div className="flex-1 overflow-y-auto bg-white border border-solid rounded-md">
           <Tabs
             defaultValue="captions"
             style={{ height: "100%", overflow: "hidden" }}
             orientation="horizontal"
           >
-            <TabsList className="w-full">
-              <TabsTrigger value="captions">Captions</TabsTrigger>
-              <TabsTrigger value="styles">Styles</TabsTrigger>
-              <TabsTrigger value="broll">B-Rolls</TabsTrigger>
-            </TabsList>
+            <div className="p-2">
+              <TabsList className="w-full">
+                <TabsTrigger value="captions">Captions</TabsTrigger>
+                <TabsTrigger value="styles">Styles</TabsTrigger>
+                <TabsTrigger value="broll">B-Rolls</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="broll" className="overflow-y-scroll">
               <div className="h-full">
@@ -207,7 +210,7 @@ export function PageClient({
 
             <TabsContent value="styles" className="overflow-y-scroll">
               <div className="h-full">
-                <StylesEditor />
+                <StylesRenderPreset />
               </div>
             </TabsContent>
 

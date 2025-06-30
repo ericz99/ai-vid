@@ -38,6 +38,7 @@
     "@remotion/tailwind-v4": "^4.0.314",
     "@remotion/transitions": "^4.0.314",
     "@remotion/webcodecs": "^4.0.314",
+    "@uiw/react-color-sketch": "^2.6.0",
     "add": "^2.0.6",
     "ai": "^4.3.16",
     "class-variance-authority": "^0.7.1",
