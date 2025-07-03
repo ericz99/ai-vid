@@ -4,6 +4,7 @@ import { RefObject } from "react";
 import { Caption, TikTokToken } from "@remotion/captions";
 import { TRACKS } from "../constants";
 import React from "react";
+import { defaultStyle } from "../captions";
 
 export interface CaptionStyle {
   id: string;
@@ -208,8 +209,9 @@ interface TimelineStore {
   ) => void;
 
   // # global caption style presets
-  captionPresetId: string;
-  setCaptionPresetId: (id: string) => void;
+  captionPreset: CaptionStyle;
+  setCaptionPreset: (preset: CaptionStyle) => void;
+  updateCaptionPreset: (preset: Partial<CaptionStyle>) => void;
 }
 
 export const useTimelineStore = create<TimelineStore>((set) => ({
@@ -218,7 +220,7 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   selectedHighlightFrame: null,
   hoveredHighlightKey: null,
   preset: null,
-  captionPresetId: "default",
+  captionPreset: defaultStyle,
 
   enableCaptions: true,
   setEnableCaptions: (checked: boolean) =>
@@ -524,10 +526,20 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
       selectedEditSequence: id,
     })),
 
-  setCaptionPresetId: (id) =>
+  setCaptionPreset: (preset) =>
     set(() => ({
-      captionPresetId: id,
+      captionPreset: preset,
     })),
+
+  updateCaptionPreset: (preset) =>
+    set((state) => {
+      return {
+        captionPreset: {
+          ...state.captionPreset,
+          ...preset,
+        },
+      };
+    }),
 
   setState: async (partialState) => {
     set((prev) => ({ ...prev, ...partialState }));

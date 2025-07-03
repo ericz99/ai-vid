@@ -18,6 +18,7 @@ import { TRACKS } from "./constants";
 import { HighlightTextSequence } from "./components/highlight-text-sequence";
 import { convertTokensToCaptions, WordBase } from "./utils";
 import { SubtitleSequence } from "./components/subtitle-sequence";
+// import { TwitterPostMeme } from "@/remotion/template/meme/twitter-post-meme";
 
 loadFont("normal", {
   subsets: ["latin"],
@@ -169,6 +170,13 @@ export const Main = ({
       {customTextSequences.map((seq) => (
         <HighlightTextSequence key={seq.id} sequence={seq} />
       ))}
+
+      {/* <TwitterPostMeme
+        name="xxapple"
+        body="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Officia iure in exercitationem aspernatur assumenda, explicabo quibusdam consequuntur inventore distinctio, illum ipsum, veritatis soluta sunt perspiciatis dicta aperiam? Itaque, similique tenetur."
+        userName="xxapple"
+        image="https://i.redd.it/32rn9995o3af1.jpeg"
+      /> */}
     </AbsoluteFill>
   );
 };

@@ -127,7 +127,7 @@ export const PRESET_STYLES: CaptionStyle[] = [
     emojiAnimation: false,
     gapFreeCaptions: true,
     mainColor: "#FFFF00",
-    activeColor: "#f4a261",
+    activeColor: "#003566",
     isNew: true,
     className: anton.className,
   },

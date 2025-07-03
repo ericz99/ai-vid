@@ -6,15 +6,18 @@ import { useTimelineStore } from "@/remotion/store";
 import { Pen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { ColorPickerButton } from "@/components/color-picker-modal";
 
 export function StylesRenderPreset() {
   const [hoverPresetId, setHoverPresetId] = useState<string | null>(null);
-  const captionPresetId = useTimelineStore((s) => s.captionPresetId);
-  const setCaptionPresetId = useTimelineStore((s) => s.setCaptionPresetId);
+  const captionPreset = useTimelineStore((s) => s.captionPreset);
+  const setCaptionPreset = useTimelineStore((s) => s.setCaptionPreset);
+  const updateCaptionPreset = useTimelineStore((s) => s.updateCaptionPreset);
 
   const selectedPreset = useMemo(() => {
-    return getStylePreset(captionPresetId);
-  }, [captionPresetId]);
+    return getStylePreset(captionPreset.id);
+  }, [captionPreset]);
 
   return (
     <div className="flex flex-col relative h-full">
@@ -25,7 +28,7 @@ export function StylesRenderPreset() {
               fontFamily: preset.fontFamily,
               fontWeight: preset.fontWeight.toLowerCase(),
               textTransform: preset.uppercase ? "uppercase" : "none",
-              fontSize: 18,
+              fontSize: 24,
               color: preset.fontColor,
               paintOrder: "stroke",
               WebkitTextStroke: `${
@@ -64,7 +67,7 @@ export function StylesRenderPreset() {
                     ? "border-2 border-red-400"
                     : "border-2 border-transparent hover:border-red-500"
                 }`}
-                onClick={() => setCaptionPresetId(preset.id)}
+                onClick={() => setCaptionPreset(preset)}
                 onMouseEnter={() => setHoverPresetId(preset.id)}
                 onMouseLeave={() => setHoverPresetId(null)}
               >
@@ -106,7 +109,84 @@ export function StylesRenderPreset() {
         </div>
       </div>
 
-      <div className="py-6 px-2 border-t">preset</div>
+      <div className="p-3 border-t flex gap-4 justify-center">
+        <div className="flex flex-col gap-2 items-center">
+          <h2 className="text-xs font-medium text-zinc-500">Position Y</h2>
+
+          <div className="flex gap-2 relative max-w-16 w-full">
+            <Input
+              type="text"
+              inputMode="decimal"
+              value={captionPreset.positionY}
+              onChange={(e) => {
+                updateCaptionPreset({
+                  positionY: Number(e.target.value),
+                });
+              }}
+              min={0}
+              max={80}
+              step={2}
+              className="text-lg"
+            />
+
+            <span className="absolute right-2 top-1 text-lg select-none">
+              %
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 items-center">
+          <h2 className="text-xs font-medium text-zinc-500">Font Size</h2>
+
+          <div className="flex gap-2 relative max-w-16 w-full">
+            <Input
+              type="text"
+              inputMode="decimal"
+              className="text-lg"
+              value={captionPreset.fontSize}
+              onChange={(e) => {
+                updateCaptionPreset({
+                  fontSize: Number(e.target.value),
+                });
+              }}
+            />
+
+            <span className="absolute right-2 top-1 text-lg select-none">
+              px
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 items-center">
+          <h2 className="text-xs font-medium text-zinc-500">Main</h2>
+
+          <div className="flex gap-2 relative">
+            <ColorPickerButton type="mainColor">
+              <div
+                className={`w-10 h-10 bg-[${captionPreset.mainColor}] rounded-md border-2`}
+                style={{
+                  backgroundColor: captionPreset.mainColor,
+                }}
+              />
+            </ColorPickerButton>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 items-center">
+          <h2 className="text-xs font-medium text-zinc-500">Active</h2>
+
+          <div className="flex gap-2 relative">
+            <ColorPickerButton type="activeColor">
+              <div
+                className={`w-10 h-10 bg-[${captionPreset.activeColor}] rounded-md border-2`}
+                style={{
+                  backgroundColor: captionPreset.activeColor,
+                }}
+              />
+            </ColorPickerButton>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

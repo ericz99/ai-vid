@@ -1,7 +1,10 @@
 "use client";
 
-import { memo } from "react";
-import type { TextSequence as ITextSequence } from "@/remotion/store";
+import { memo, useMemo } from "react";
+import {
+  useTimelineStore,
+  type TextSequence as ITextSequence,
+} from "@/remotion/store";
 import {
   Sequence,
   useCurrentFrame,
@@ -28,10 +31,9 @@ const container: React.CSSProperties = {
   zIndex: "10",
 };
 
-const HIGHLIGHT_COLOR = "#f4a261";
-
 export const SubtitleSequence = memo(
   ({ sequence }: { sequence: ITextSequence }) => {
+    const captionPreset = useTimelineStore((s) => s.captionPreset);
     const { fromMs, toMs, config, tokens } = sequence;
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
@@ -41,6 +43,45 @@ export const SubtitleSequence = memo(
     const toFrame = (toMs / 1000) * fps;
     const durationInFrames = toFrame - fromFrame;
 
+    const presetStyles = useMemo(() => {
+      const styles = {
+        fontFamily: captionPreset.fontFamily,
+        fontWeight: captionPreset.fontWeight.toLowerCase(),
+        textTransform: captionPreset.uppercase ? "uppercase" : "none",
+        fontSize: Math.min(24, captionPreset.fontSize),
+        color: captionPreset.fontColor,
+        paintOrder: "stroke",
+        WebkitTextStroke: `${
+          captionPreset.strokeWeight === "None"
+            ? 0
+            : captionPreset.strokeWeight === "Small"
+            ? 1
+            : captionPreset.strokeWeight === "Medium"
+            ? 2
+            : 3
+        }px ${captionPreset.strokeColor}`,
+        textShadow:
+          captionPreset.shadow === "None"
+            ? "none"
+            : `${
+                captionPreset.shadow === "Small"
+                  ? "1px 1px 2px"
+                  : captionPreset.shadow === "Medium"
+                  ? "2px 2px 4px"
+                  : "3px 3px 6px"
+              } rgba(0,0,0,0.5)`,
+        lineHeight: 1.2,
+      } as React.CSSProperties;
+
+      if (captionPreset.backgroundColor) {
+        styles["backgroundColor"] = captionPreset.backgroundColor;
+        styles["padding"] = "2px 6px";
+        styles["borderRadius"] = "6px";
+      }
+
+      return styles;
+    }, [captionPreset]);
+
     return (
       <Sequence from={fromFrame} durationInFrames={durationInFrames}>
         <AbsoluteFill
@@ -49,7 +90,7 @@ export const SubtitleSequence = memo(
             ...config.pos,
           }}
         >
-          <span
+          <div
             style={{
               WebkitTextStroke: "5px black",
               paintOrder: "stroke",
@@ -58,12 +99,13 @@ export const SubtitleSequence = memo(
               fontFamily,
               textTransform: "uppercase",
               width: "100%",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
               alignItems: "center",
               fontSize: 24,
               color: "#ffffff",
+              whiteSpace: "nowrap",
+              display: "inline-block",
+              maxWidth: "fit-content",
+              ...presetStyles,
             }}
           >
             {tokens.map((t) => {
@@ -76,14 +118,16 @@ export const SubtitleSequence = memo(
                   style={{
                     display: "inline",
                     whiteSpace: "pre",
-                    color: active ? HIGHLIGHT_COLOR : "white",
+                    color: active
+                      ? captionPreset.activeColor
+                      : captionPreset.mainColor,
                   }}
                 >
                   {t.text}
                 </span>
               );
             })}
-          </span>
+          </div>
         </AbsoluteFill>
       </Sequence>
     );

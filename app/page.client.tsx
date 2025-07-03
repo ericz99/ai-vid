@@ -40,7 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CaptionsEditor } from "@/components/captions-editor";
-import { StylesEditor } from "@/components/styles-editor";
+// import { StylesEditor } from "@/components/styles-editor";
 import { WordBase } from "@/remotion/utils";
 import { BrollEditor } from "@/components/broll-editor";
 import { StylesRenderPreset } from "@/components/styles-render-preset";
@@ -185,6 +185,8 @@ export function PageClient({
   // ✅ TODO: if we were to click something it should jump to frame, but if we clicked on a highlighted (ALREADY HIGHLIGHTED) text, it should no open the default dropdown
   // TODO: cursor from beginning to end, i want to be able to reselect remove or add more  from a range
 
+  console.log("config", config);
+
   return (
     <div className="flex flex-col justify-center items-center relative h-full">
       <div className="md:max-w-full lg:max-w-6xl lg:container lg:mx-auto h-full max-h-full flex gap-4 overflow-hidden p-4">
@@ -203,7 +205,7 @@ export function PageClient({
             </div>
 
             <TabsContent value="broll" className="overflow-y-scroll">
-              <div className="h-full">
+              <div className="h-full p-2">
                 <BrollEditor />
               </div>
             </TabsContent>
@@ -215,7 +217,9 @@ export function PageClient({
             </TabsContent>
 
             <TabsContent value="captions" className="overflow-y-scroll">
-              <CaptionsEditor />
+              <div className="h-full p-2">
+                <CaptionsEditor />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

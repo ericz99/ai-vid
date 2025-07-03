@@ -4,8 +4,7 @@ import {
   COMP_NAME,
   DEFAULT_DURATION_IN_FRAMES,
   DEFAULT_VIDEO_FPS,
-  DEFAULT_VIDEO_HEIGHT,
-  DEFAULT_VIDEO_WIDTH,
+  VIDEO_DIMENSIONS,
 } from "@/lib/preset";
 
 export const RemotionRoot: React.FC = () => {
@@ -16,8 +15,8 @@ export const RemotionRoot: React.FC = () => {
         component={Main}
         durationInFrames={DEFAULT_DURATION_IN_FRAMES}
         fps={DEFAULT_VIDEO_FPS}
-        width={DEFAULT_VIDEO_WIDTH}
-        height={DEFAULT_VIDEO_HEIGHT}
+        width={VIDEO_DIMENSIONS.YouTube.standard.width}
+        height={VIDEO_DIMENSIONS.YouTube.standard.height}
         defaultProps={{
           subtitles: null,
           videoSrc: "",
