@@ -5,3 +5,7 @@
 - Supports Caption
 - Sequence Timeline
 - B-rolls support (coming soon)
+
+## Preview
+
+![preview](image.png)
